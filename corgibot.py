@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-import discord, discord.utils, random, os, re, json,sys
+import discord, discord.utils, random, os, re, json, sys, time
 from os import path
-from shutil import copyfile
 from datetime import datetime, timedelta
 from discord.ext import commands
 from discord.utils import get
@@ -29,6 +28,18 @@ async def on_message(message):
 
     print('Message from {0.author}: {0.content}'.format(message))
 
+    roles = message.author.roles
+    isCommittee = False
+    isCaptain = False
+    isJudge = False
+    for role in roles:
+        if role.id == "VTC Committee" or role.name == "Thom":
+            isCommittee = True
+        if role.id == "Judge":
+            isJudge = True
+        if role.name == "Team Captain":
+            isCaptain = True
+
     #Find Bot-logs channel. There is probably a better way than this though.
     for channel in message.guild.channels:
         if channel.name == "bot-logs":
@@ -52,16 +63,115 @@ async def on_message(message):
             response = "It's Tails!"
         await message.channel.send(response.format(message))
 
+    #Timer commands
+    if message.content.lower() == "$timer":
+        await message.channel.send("The $timer command must be followed by a time period, and optionally a reason. For example: `$timer 03:00` will set a timer for 3 hours. If you wish, you can include a reason afterwards. For example: `$timer 01:30 Ryan and Thom's game` will set a timer for 1 hour 30 minutes with the reason *\"Ryan and Thom's game\"*.")
+        return
+
+    if message.content.lower().startswith("$timer "):
+        timer = message.content[7:12]
+        hours = message.content[7:9]
+        minutes = message.content[10:12]
+        seconds = "00"
+        reason = message.content[13:]
+        if re.match("[0-9][0-9]:[0-5][0-9]",timer):
+            response = "Setting timer for " + str(int(hours)) + " hour(s) and " + str(int(minutes)) + " minute(s). Let the count down begin!"
+            await message.channel.send(response.format(message))
+            
+            duration = int(seconds) + (int(minutes) * 60) + (int(hours) * 60 *60)
+            now = datetime.utcnow()
+            embed = discord.Embed(title="Timer", description=reason, color=0x4444dd)
+            embed.add_field(name="Duration", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
+            embed.add_field(name="Remaining", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
+            embed.set_footer(text="Updated at: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+            timermsg = await message.channel.send(embed=embed)
+            
+            #Start counting down
+            start = datetime.now()
+            end = start + timedelta(seconds=duration)
+            i = 0
+            while datetime.now() < end:
+                time.sleep(0.5)
+                i = i+1
+                remaining = int((end - datetime.now()).total_seconds())
+                hours = str(int(remaining / 3600))
+                minutes = str(int((remaining % 3600)/60))
+                seconds = str(remaining % 60)
+                if (remaining >= 600 and i == 30) or (remaining >= 30 and remaining < 600 and i >= 10) or (remaining < 30 and i >= 5) or remaining <= 5:
+                    now = datetime.utcnow()
+                    embed.set_field_at(1,name="Remaining", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
+                    embed.set_footer(text="Updated at: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                    await timermsg.edit(embed=embed)
+                    i = 0
+            
+            #timer complete!
+            embed.set_field_at(1,name="Remaining", value="`00:00:00` ", inline=True) 
+            await timermsg.edit(embed=embed)
+            response = "Your timer has finished {0.author.mention}!".format(message)
+            await message.channel.send(response)
+        else:
+            await message.channel.send("That isn't a valid time!")
+        return
+
+    if message.content.lower() == "$heret":
+        response = "The $heret command must be followed by a time period and a reason. For example: `!here 03:00 dice down` will set a timer for 3 hours the reason *\"dice down\"*."
+        await message.channel.send(response.format(message))
+        return
+
+    if message.content.lower().startswith("$heret "):
+        timer = message.content[7:12]
+        hours = message.content[7:9]
+        minutes = message.content[10:12]
+        seconds = "00"
+        reason = message.content[13:]
+        if reason == "":
+            await message.channel.send("Here timers must have a reason.")
+            return
+        roles =  message.author.roles
+        if isJudge == False and isCommittee == False:
+            await message.channel.send("You must be a Judge or Committee Member to use Here Timers.")
+        elif re.match("[0-9][0-9]:[0-5][0-9]",timer):
+            response = "Setting timer for " + str(int(hours)) + " hour(s) and " + str(int(minutes)) + " minute(s). Let the count down begin!"
+            await message.channel.send(response.format(message))
+            
+            duration = int(seconds) + (int(minutes) * 60) + (int(hours) * 60 *60)
+            now = datetime.utcnow()
+            embed = discord.Embed(title="Here Timer", description=reason, color=0x4444dd)
+            embed.add_field(name="Duration", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
+            embed.add_field(name="Remaining", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
+            embed.set_footer(text="Updated at: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+            timermsg = await message.channel.send(embed=embed)
+            
+            #Start counting down
+            start = datetime.now()
+            end = start + timedelta(seconds=duration)
+            i = 0
+            while datetime.now() < end:
+                i = i+1
+                time.sleep(0.5)
+                remaining = int((end - datetime.now()).total_seconds())
+                hours = str(int(remaining / 3600))
+                minutes = str(int((remaining % 3600)/60))
+                seconds = str(remaining % 60)
+                if (remaining >= 600 and i == 30) or (remaining >= 30 and remaining < 600 and i >= 10) or (remaining < 30 and i >= 5) or remaining <= 5:
+                    now = datetime.utcnow()
+                    embed.set_field_at(1,name="Remaining", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
+                    embed.set_footer(text="Updated at: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                    await timermsg.edit(embed=embed)
+                    i = 0
+            
+            #timer complete!
+            embed.set_field_at(1,name="Remaining", value="`00:00:00` ", inline=True) 
+            await timermsg.edit(embed=embed)
+            response = "".join(["@here , the timer has finished! ", reason]).format(message)
+            await message.channel.send(response)
+        else:
+            await message.channel.send("That isn't a valid time!")
+        return
+
+
     #Want these commands in the right channel
     if str(message.channel).lower().startswith("bot"):
-        roles = message.author.roles
-        isCommittee = False
-        isCaptain = False
-        for role in roles:
-            if role.id == "VTC Committee" or role.name == "Thom":
-                isCommittee = True
-            if role.name == "Team Captain":
-                isCaptain = True
 
         if message.content.lower() == "$colours":
             response = "You can choose from any of the following colours: *" + ", ".join(colours) + "*"
@@ -101,6 +211,8 @@ Thanks for joining the tournament, and good luck!"""
                 embed.add_field(name="Added ID", value=message.author.id, inline=False)
                 embed.add_field(name="Captain Added", value=message.mentions[0].display_name, inline=False)
                 embed.add_field(name="Captain ID", value=message.mentions[0].id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
                 return
 
@@ -126,6 +238,8 @@ Thanks for joining the tournament, and good luck!"""
                 embed.add_field(name="Added ID", value=message.author.id, inline=False)
                 embed.add_field(name="Judge Added", value=message.mentions[0].display_name, inline=False)
                 embed.add_field(name="Judge ID", value=message.mentions[0].id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
                 return
 
@@ -154,6 +268,8 @@ Thanks for joining the tournament, and good luck!"""
                 embed.add_field(name="Added ID", value=message.author.id, inline=False)
                 embed.add_field(name="Head Judge Added", value=message.mentions[0].display_name, inline=False)
                 embed.add_field(name="Head Judge ID", value=message.mentions[0].id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
                 return
 
@@ -179,6 +295,8 @@ Thanks for joining the tournament, and good luck!"""
                         embed.add_field(name="Removed ID", value=message.author.id, inline=False)
                         embed.add_field(name="Removed Player", value=message.mentions[0].display_name, inline=False)
                         embed.add_field(name="Removed ID", value=message.mentions[0].id, inline=False)
+                        now = datetime.utcnow()
+                        embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                         await logchannel.send(embed=embed)
                     else:
                         await message.channel.send("User does not have the Judge Role to remove.")
@@ -199,6 +317,8 @@ Thanks for joining the tournament, and good luck!"""
                         embed.add_field(name="Removed ID", value=message.author.id, inline=False)
                         embed.add_field(name="Removed Player", value=message.mentions[0].display_name, inline=False)
                         embed.add_field(name="Removed ID", value=message.mentions[0].id, inline=False)
+                        now = datetime.utcnow()
+                        embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                         await logchannel.send(embed=embed)
                     if role1.name == "Judge" or role1.name == "Head Judge":
                         await message.mentions[0].remove_roles(role1)
@@ -214,6 +334,8 @@ Thanks for joining the tournament, and good luck!"""
                         embed.add_field(name="Removed ID", value=message.author.id, inline=False)
                         embed.add_field(name="Removed Player", value=message.mentions[0].display_name, inline=False)
                         embed.add_field(name="Removed ID", value=message.mentions[0].id, inline=False)
+                        now = datetime.utcnow()
+                        embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                         await logchannel.send(embed=embed)
                 return
 
@@ -239,6 +361,8 @@ Thanks for joining the tournament, and good luck!"""
                 embed.add_field(name="Added ID", value=message.author.id, inline=False)
                 embed.add_field(name="Judge Added", value=message.mentions[0].display_name, inline=False)
                 embed.add_field(name="Judge ID", value=message.mentions[0].id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
                 return
 
@@ -261,6 +385,8 @@ Thanks for joining the tournament, and good luck!"""
                     embed.add_field(name="Removed ID", value=message.author.id, inline=False)
                     embed.add_field(name="Removed Player", value=message.mentions[0].display_name, inline=False)
                     embed.add_field(name="Removed ID", value=message.mentions[0].id, inline=False)
+                    now = datetime.utcnow()
+                    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                     await logchannel.send(embed=embed)
                 else:
                     await message.channel.send("User does not have the Streamer Role to remove.")
@@ -334,6 +460,8 @@ Thanks for joining the tournament, and good luck!"""
                     embed.add_field(name="Created By", value=message.author.display_name, inline=False)
                     embed.add_field(name="Created ID", value=message.author.id, inline=False)
                     embed.add_field(name="Team Name", value=teamname, inline=False)
+                    now = datetime.utcnow()
+                    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                     await logchannel.send(embed=embed)
 
                 #They are in one, so edit the Team's name
@@ -352,6 +480,8 @@ Thanks for joining the tournament, and good luck!"""
                     embed.add_field(name="Changed ID", value=message.author.id, inline=False)
                     embed.add_field(name="Old Team Name", value=teamrole.name, inline=False)
                     embed.add_field(name="New Team Name", value=teamname, inline=False)
+                    now = datetime.utcnow()
+                    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                     await logchannel.send(embed=embed)
                     await teamrole.edit(name=teamname)
                     response = "Team Name has been changed to " + teamname +"."
@@ -387,6 +517,8 @@ Thanks for joining the tournament, and good luck!"""
                     #Log details
                     embed.add_field(name="Changed By", value=message.author.display_name, inline=False)
                     embed.add_field(name="Changed ID", value=message.author.id, inline=False)
+                    now = datetime.utcnow()
+                    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                     await logchannel.send(embed=embed)
 
                 return
@@ -415,6 +547,8 @@ Thanks for joining the tournament, and good luck!"""
                 embed.add_field(name="Added ID", value=message.author.id, inline=False)
                 embed.add_field(name="New Player", value=message.mentions[0].display_name, inline=False)
                 embed.add_field(name="NewID", value=message.mentions[0].id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
 
         if message.content.lower().startswith("$removeplayer"):
@@ -438,6 +572,8 @@ Thanks for joining the tournament, and good luck!"""
                 embed.add_field(name="Removed ID", value=message.author.id, inline=False)
                 embed.add_field(name="Removed Player", value=message.mentions[0].display_name, inline=False)
                 embed.add_field(name="Removed ID", value=message.mentions[0].id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
 
 
