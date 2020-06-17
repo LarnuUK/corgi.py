@@ -33,12 +33,16 @@ async def on_message(message):
     isCaptain = False
     isJudge = False
     for role in roles:
+        #As people, by design, can't have multiple rules, then we can safely break and not loop around 40~ roles
         if role.id == "VTC Committee" or role.name == "Thom":
             isCommittee = True
+            break
         if role.id == "Judge":
             isJudge = True
+            break
         if role.name == "Team Captain":
             isCaptain = True
+            break        
 
     #Find Bot-logs channel. There is probably a better way than this though.
     for channel in message.guild.channels:
@@ -49,6 +53,12 @@ async def on_message(message):
     for mentions in message.mentions:
         if mentions.id == message.guild.me.id:
             await message.channel.send("Woof?")
+            break;
+
+    if message.content.lower() == ("$github"):
+        response = "You can find my master's github here: https://github.com/LarnuUK"
+        await message.channel.send(response.format(message))
+        return
 
     if message.content.lower() == ("$roll"):
         i = random.randint(1,6)
