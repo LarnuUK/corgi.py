@@ -32,3 +32,7 @@ Captains manage their own teams. Corgi will have DM'd you when you were given th
 > 6. I'm a Team Member, how do I get my team's role?
 Please contact your Team Captain, who can give you the role.
 
+-----
+
+> 7. I'm a streamer, can I get a webhook?
+Yes. Streamers have permission to add their webhooks to the #streams . The webhooks will be removed at the end of the tournament. Please do not use it for webhooks other than streams that will cast the games here (these will be removed and the @Streamer  your be removed).
