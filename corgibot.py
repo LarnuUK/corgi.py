@@ -284,6 +284,8 @@ Thanks for joining the tournament, and good luck!"""
                         CaptainRole = guildrole
                     elif guildrole.name == "VTC Committee":
                         CommitteeRole = guildrole
+                    elif guildrole.name == "Judge":
+                        JudgeRole = guildrole
                     elif guildrole.name == "Head Judge":
                         HeadJudgeRole = guildrole
                 #Check Team Captain is already in a Team
@@ -302,14 +304,20 @@ Thanks for joining the tournament, and good luck!"""
                             print(guildchannel.name)
                             if guildchannel.type.name == "text" and "game" in guildchannel.name.lower():
                                 print("Setting read and send message permissions")
-                                await guildchannel.set_permissions(newrole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True)
+                                await guildchannel.set_permissions(newrole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True,add_reactions=True)
+                                #await guildchannel.set_permissions(CommitteeRole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True,manage_messages=True,mention_everyone=True,add_reactions=True)
+                                #await guildchannel.set_permissions(HeadJudgeRole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True,manage_messages=True,mention_everyone=True,add_reactions=True)
+                                #await guildchannel.set_permissions(JudgeRole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True,mention_everyone=True,add_reactions=True)
                             elif guildchannel.type.name == "voice" and "game" in guildchannel.name.lower():
                                 print("Setting connect and speak permissions")
                                 await guildchannel.set_permissions(newrole,view_channel=True,connect=True,speak=True)
+                                #await guildchannel.set_permissions(CommitteeRole,view_channel=True,connect=True,speak=True,mute_members=True,move_members=True,priority_speaker=True)
+                                #await guildchannel.set_permissions(HeadJudgeRole,view_channel=True,connect=True,speak=True,mute_members=True,move_members=True,priority_speaker=True)
+                                #await guildchannel.set_permissions(JudgeRole,view_channel=True,connect=True,speak=True,mute_members=True,move_members=True,priority_speaker=True)
                     await message.channel.send("Table Permissions set. Creating team channels.")
                     #Create the Category and Channels
                     newcategory = await guild.create_category(teamname)
-                    await newcategory.edit(position=5)
+                    #await newcategory.edit(position=5) #Decided against this.
                     talkrights = {guild.default_role: discord.PermissionOverwrite(read_messages=False),guild.me: discord.PermissionOverwrite(read_messages=True)}
                     newtalk = await guild.create_text_channel(name="Team Chat",category=newcategory,overwrites=talkrights)
                     await newtalk.set_permissions(newrole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True)
