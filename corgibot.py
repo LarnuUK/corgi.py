@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 key = os.getenv('DISCORD_KEY')
+status = os.getenv('DISCORD_STATUS')
 
 #Bad way to do it, I know.
 colours = ["default","teal","dark teal","green","dark green","blue","dark blue","purple","dark purple","magenta","dark magenta","gold","dark gold","orange","dark orange","red","dark red","lighter grey", "dark grey", "light grey", "darker grey", "blurple", "greyple"]
@@ -18,7 +19,7 @@ client = discord.Client()
 @client.event
 async def on_ready():
     print('Logged on as {0}!'.format(client.user))
-    game = discord.Game("See #bot-help")
+    game = discord.Game(status)
     await client.change_presence(status=discord.Status.online, activity=game)
 
 @client.event
@@ -32,8 +33,11 @@ async def on_message(message):
     isCommittee = False
     isCaptain = False
     isJudge = False
+    isThom = False
     for role in roles:
         #As people, by design, can't have multiple rules, then we can safely break and not loop around 40~ roles
+        if role.name == "Thom":
+            isThom = True
         if role.id == "VTC Committee" or role.name == "Thom":
             isCommittee = True
             break
@@ -424,6 +428,12 @@ Thanks for joining the tournament, and good luck!"""
                         JudgeRole = guildrole
                     elif guildrole.name == "Head Judge":
                         HeadJudgeRole = guildrole
+                guildcategories = guild.categories
+                for category in guildcategories:
+                    if category.name.lower() == teamname.lower():
+                        response = "A category with the name " + category.name +" already exists. Please choose a different name."
+                        await message.channel.send(response)
+                        return
                 #Check Team Captain is already in a Team
                 if len(message.author.roles) == 2:
                     newrole = await guild.create_role(name=teamname, hoist=True)
@@ -530,7 +540,6 @@ Thanks for joining the tournament, and good luck!"""
                     now = datetime.utcnow()
                     embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                     await logchannel.send(embed=embed)
-
                 return
 
         if message.content.lower().startswith("$addplayer"):
@@ -560,6 +569,7 @@ Thanks for joining the tournament, and good luck!"""
                 now = datetime.utcnow()
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
+            return
 
         if message.content.lower().startswith("$removeplayer"):
             if isCaptain == False:
@@ -585,6 +595,72 @@ Thanks for joining the tournament, and good luck!"""
                 now = datetime.utcnow()
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
+            return
+
+        if message.content.lower() == "$openserver":
+            if isThom == False:
+                await message.channel.send("Only Thom can use that command.")
+                return
+            else:
+                #get everyone role
+                guild = message.guild
+                for role in guild.roles:
+                    if role.name == "@everyone":
+                        everyone = role
+                        break
+                await message.channel.send("Setting table permissions... Please hold.")
+                guildchannels = guild.channels
+                for guildchannel in guildchannels:
+                        print(guildchannel.name)
+                        if guildchannel.type.name == "text" and "game" in guildchannel.name.lower():
+                            print("Setting read and send message permissions")
+                            await guildchannel.set_permissions(everyone, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True,add_reactions=True)
+                        elif guildchannel.type.name == "voice" and "game" in guildchannel.name.lower():
+                            print("Setting connect and speak permissions")
+                            await guildchannel.set_permissions(everyone,view_channel=True,connect=True,speak=True)
+                await message.channel.send("Server is now open to everyone.")
+                embed = discord.Embed(title="Open Server to Public", color=0x22cc22) 
+                embed.add_field(name="Opened By", value=message.author.display_name, inline=False)
+                embed.add_field(name="Opened ID ID", value=message.author.id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                await logchannel.send(embed=embed)
+                return
+
+        if message.content.lower() == "$closeserver":
+            if isThom == False:
+                await message.channel.send("Only Thom can use that command.")
+                return
+            else:
+                #get everyone role
+                guild = message.guild
+                for role in guild.roles:
+                    if role.name == "@everyone":
+                        everyone = role
+                        break
+                await message.channel.send("Setting table permissions... Please hold.")
+                guildchannels = guild.channels
+                for guildchannel in guildchannels:
+                    if guildchannel.name.lower().startswith('table') and not guildchannel.name.lower().endswith('chat') and not guildchannel.name.lower().endswith('talk'):
+                        print(guildchannel.name)
+                        if guildchannel.type.name == "text" and "game" in guildchannel.name.lower():
+                            print("Setting read and send message permissions")
+                            await guildchannel.set_permissions(everyone, read_messages=False, send_messages=False, embed_links=False, attach_files=False, read_message_history=False, use_external_emojis=False,add_reactions=False)
+                        elif guildchannel.type.name == "voice" and "game" in guildchannel.name.lower():
+                            print("Setting connect and speak permissions")
+                            await guildchannel.set_permissions(everyone,view_channel=False)
+                await message.channel.send("Server is now open to everyone.")
+                embed = discord.Embed(title="Open Server to Public", color=0xcc2222) 
+                embed.add_field(name="Opened By", value=message.author.display_name, inline=False)
+                embed.add_field(name="Opened ID ID", value=message.author.id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                await logchannel.send(embed=embed)
+                return
+
+                             
+
+        
 
 
 client.run(key)
