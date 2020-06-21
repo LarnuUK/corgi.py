@@ -1,5 +1,7 @@
 **All User commands:**
-$Roll - rolls a D6
+$Roll - rolls a D6.
+$Flip - Flips a coin.
+$GitHub - Provides a link to Thom's github.
 $Timer - Sets a timer for the requested time period. Time must in the format `hh:mm`. For example `$Timer 03:00` will set a timer for 3 hours. Can optionally be followed by a message. On expiry the user who created it will receive a ping.
 
 The following commands can only be used in #bot-commands (except `$heret`):
@@ -12,7 +14,7 @@ $AddJudge - Gives a user the Judge Role. Must be followed by a mentioned user (Y
 $AddHeadJudge - Gives a user the Head Judge and Judge Roles. Must be followed by a mentioned user (You cannot make a user who already had a role a Judge). Please note this will also error if you try to give a Judge the Head Judge Role *(This might be fixed. Work around it to remove the Judge Role and give the Head Judge.)*
 $RemoveJudge - Removes a user from the (Head) Judge Role(s).
 $AddStreamer - Gives a user the Streamer Roler. Must be followed by a mentioned user (You cannot make a user who already have a role a Judge).
-$RemoveStream - Removes a user from the Stream Role.
+$RemoveStreamer - Removes a user from the Stream Role.
 $heret - Sets a timer for the requested time period. Time must in the format `hh:mm`. Must be followed by a message. For example `$heret 01:30 Dice down!`. On expiry the @here role will be pinged.
 
 -----
@@ -24,4 +26,4 @@ $TeamColour - Sets the colour for team's role. Must be 6 digit hex or a predefin
 $AddPlayer - Adds a user to your Team Role. Must be followed by a mentioned user: for example `$AddPlayer @ryanwillmott923#0436`. You cannot add a User who is a member of another team to your team.
 $RemovePlayer  - Removes a user to your Team Role. Must be followed by a mentioned user: for example `$RemovePlayer @ryanwillmott923#0436`
 
-Adding/Removing a user from your team's role will grant/remove their access rights to your team's channel category.
+Adding/Removing a user from your team's role will grant/remove their access rights to your team's channel and category, as well as the tables while the server closed is to everyone during an event.
