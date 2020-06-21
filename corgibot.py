@@ -48,12 +48,6 @@ async def on_message(message):
             isCaptain = True
             break        
 
-    #Find Bot-logs channel. There is probably a better way than this though.
-    for channel in message.guild.channels:
-        if channel.name == "bot-logs":
-            logchannel = channel
-            break
-
     for mentions in message.mentions:
         if mentions.id == message.guild.me.id:
             await message.channel.send("Woof?")
@@ -68,6 +62,7 @@ async def on_message(message):
         i = random.randint(1,6)
         response = "You rolled a " + str(i) + " {0.author.mention}."
         await message.channel.send(response.format(message))
+        return
 
     if message.content.lower() == ("$flip"):
         i = random.randint(0,1)
@@ -76,6 +71,13 @@ async def on_message(message):
         else:
             response = "It's Tails!"
         await message.channel.send(response.format(message))
+        return
+
+    #Find Bot-logs channel. There is probably a better way than this though.
+    for channel in message.guild.channels:
+        if channel.name == "bot-logs":
+            logchannel = channel
+            break
 
     #Timer commands
     if message.content.lower() == "$timer":
@@ -196,13 +198,10 @@ async def on_message(message):
         if message.content.lower().startswith("$addcaptain"):
             if isCommittee == False:
                 await message.channel.send("Only Committee members can use that command.")
-                return
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to give Team Captain role.")
-                return
             elif len(message.mentions[0].roles) > 1:
                 await message.channel.send("User already has a server role and cannot be made a captain.")
-                return
             else:
                 role = discord.utils.get(message.guild.roles, name="Team Captain")
                 await message.mentions[0].add_roles(role)
@@ -228,19 +227,16 @@ Thanks for joining the tournament, and good luck!"""
                 now = datetime.utcnow()
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
-                return
+            return
 
         #Give someone the Judge Rank
         if message.content.lower().startswith("$addjudge"):
             if isCommittee == False:
                 await message.channel.send("Only Committee members can use that command.")
-                return
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to give Judge role.")
-                return
             elif len(message.mentions[0].roles) > 1:
                 await message.channel.send("User already has a server role and cannot be made a Judge.")
-                return
             else:
                 role = discord.utils.get(message.guild.roles, name="Judge")
                 await message.mentions[0].add_roles(role)
@@ -255,20 +251,17 @@ Thanks for joining the tournament, and good luck!"""
                 now = datetime.utcnow()
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
-                return
+            return
 
 
         #Give someone the Judge Rank
         if message.content.lower().startswith("$addheadjudge"):
             if isCommittee == False:
                 await message.channel.send("Only Committee members can use that command.")
-                return
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to give Head Judge role.")
-                return
             elif len(message.mentions[0].roles) > 1:
                 await message.channel.send("User already has a server role and cannot be made a Judge.")
-                return
             else:
                 role = discord.utils.get(message.guild.roles, name="Judge")
                 await message.mentions[0].add_roles(role)
@@ -285,7 +278,7 @@ Thanks for joining the tournament, and good luck!"""
                 now = datetime.utcnow()
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
-                return
+            return
 
         if message.content.lower().startswith("$removejudge"):
             if isCommittee == False:
@@ -357,13 +350,10 @@ Thanks for joining the tournament, and good luck!"""
         if message.content.lower().startswith("$addstreamer"):
             if isCommittee == False:
                 await message.channel.send("Only Committee members can use that command.")
-                return
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to give Streamer role.")
-                return
             elif len(message.mentions[0].roles) > 1:
                 await message.channel.send("User already has a server role and cannot be made a Streamer.")
-                return
             else:
                 role = discord.utils.get(message.guild.roles, name="Streamer")
                 await message.mentions[0].add_roles(role)
@@ -378,15 +368,13 @@ Thanks for joining the tournament, and good luck!"""
                 now = datetime.utcnow()
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
-                return
+            return
 
         if message.content.lower().startswith("$removestreamer"):
             if isCommittee == False:
                 await message.channel.send("Only Committee members can use that command.")
-                return
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to remove Streamer role.")
-                return
             else:
                 role = message.mentions[0].roles[1]
                 if role.name == "Streamer":
@@ -404,7 +392,7 @@ Thanks for joining the tournament, and good luck!"""
                     await logchannel.send(embed=embed)
                 else:
                     await message.channel.send("User does not have the Streamer Role to remove.")
-                return
+            return
 
         if message.content.lower().startswith("$teamname"):
             if isCaptain == False:
@@ -511,7 +499,6 @@ Thanks for joining the tournament, and good luck!"""
         if message.content.lower().startswith("$teamcolour"):
             if isCaptain == False:
                 await message.channel.send("Only Team Captains can use that command.")
-                return
             else:
                 teamcolour = message.content[12:].lower()
                 if len(message.author.roles) == 2:
@@ -540,18 +527,15 @@ Thanks for joining the tournament, and good luck!"""
                     now = datetime.utcnow()
                     embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                     await logchannel.send(embed=embed)
-                return
+            return
 
         if message.content.lower().startswith("$addplayer"):
             if isCaptain == False:
                 await message.channel.send("Only Team Captains can use that command.")
-                return
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to give Team role.")
-                return
             elif len(message.mentions[0].roles) > 1:
                 await message.channel.send("User already has a server role and cannot be added to a team.")
-                return
             else:
                 if message.author.roles[1].name == "Team Captain":
                     teamrole = message.author.roles[2]
@@ -574,10 +558,8 @@ Thanks for joining the tournament, and good luck!"""
         if message.content.lower().startswith("$removeplayer"):
             if isCaptain == False:
                 await message.channel.send("Only Team Captains can use that command.")
-                return
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to remove Team role.")
-                return
             else:
                 if message.author.roles[1].name == "Team Captain":
                     teamrole = message.author.roles[2]
@@ -600,7 +582,6 @@ Thanks for joining the tournament, and good luck!"""
         if message.content.lower() == "$openserver":
             if isThom == False:
                 await message.channel.send("Only Thom can use that command.")
-                return
             else:
                 #get everyone role
                 guild = message.guild
@@ -621,16 +602,15 @@ Thanks for joining the tournament, and good luck!"""
                 await message.channel.send("Server is now open to everyone.")
                 embed = discord.Embed(title="Open Server to Public", color=0x22cc22) 
                 embed.add_field(name="Opened By", value=message.author.display_name, inline=False)
-                embed.add_field(name="Opened ID ID", value=message.author.id, inline=False)
+                embed.add_field(name="Opened ID", value=message.author.id, inline=False)
                 now = datetime.utcnow()
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
-                return
+            return
 
         if message.content.lower() == "$closeserver":
             if isThom == False:
                 await message.channel.send("Only Thom can use that command.")
-                return
             else:
                 #get everyone role
                 guild = message.guild
@@ -650,17 +630,12 @@ Thanks for joining the tournament, and good luck!"""
                             print("Setting connect and speak permissions")
                             await guildchannel.set_permissions(everyone,view_channel=False)
                 await message.channel.send("Server is now open to everyone.")
-                embed = discord.Embed(title="Open Server to Public", color=0xcc2222) 
+                embed = discord.Embed(title="Close Server to Public", color=0xcc2222) 
                 embed.add_field(name="Opened By", value=message.author.display_name, inline=False)
-                embed.add_field(name="Opened ID ID", value=message.author.id, inline=False)
+                embed.add_field(name="Opened ID", value=message.author.id, inline=False)
                 now = datetime.utcnow()
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
-                return
-
-                             
-
-        
-
+            return
 
 client.run(key)
