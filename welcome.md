@@ -3,7 +3,7 @@ Welcome to the Warmachine and Hordes Virtual Team Championship Discord server!
 **Getting Started:**
 As a new user, you may have limited access to the server's channels. This is by design, so don't worry if you can't see the majority of text and voice channels. Once you are given your applicable role(s) you'll be able to access any of the channels you need, and be able to send message/speak in them. Once an event has ended, the channels will be opened back up to everyone.
 
-Please do ensure you change your nickname in the server to be representative of the name you use on Conflict Chamber, or your real name. This makes everyone's lives easier and it means that all parties can identify others easily. Introducing yourself is normal in real life, so just see changing your nickname to yoru real name as the same. :)
+Please do ensure you change your nickname in the server to be representative of the name you use on Conflict Chamber, or your real name. This makes everyone's lives easier and it means that all parties can identify others easily. Introducing yourself is normal in real life, so just see changing your nickname to your real name as the same. :) Users that don't change their nickname may have their nickname forcibly changed.
 
 If you're a Team Member, then please contact your Team Captain, who can add you to the team's role. You'll then gain access to all the channels you need.
 
@@ -36,3 +36,8 @@ Please contact your Team Captain, who can give you the role.
 
 > 7. I'm a streamer, can I get a webhook?
 Yes. Streamers have permission to add their webhooks to the #streams . The webhooks will be removed at the end of the tournament. Please do not use it for webhooks other than streams that will cast the games here (these will be removed and the @Streamer  your be removed).
+
+> 8. I'm not a member of a team, can I still use the server to play games?
+Sure! During an event, the tables will be inaccessible to non-team users, however, you'll still be able to access the Casual Games Category. Feel free to use those at any time.
+
+?notes <@722841912695980042>
