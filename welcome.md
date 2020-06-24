@@ -35,9 +35,13 @@ Please contact your Team Captain, who can give you the role.
 -----
 
 > 7. I'm a streamer, can I get a webhook?
-Yes. Streamers have permission to add their webhooks to the #streams . The webhooks will be removed at the end of the tournament. Please do not use it for webhooks other than streams that will cast the games here (these will be removed and the @Streamer  your be removed).
+Yes. Streamers have permission to add their webhooks to the #streams . The webhooks will be removed at the end of the tournament. Please do not use it for webhooks other than streams that will cast the games here (these will be removed along with your @Streamer role).
 
 > 8. I'm not a member of a team, can I still use the server to play games?
 Sure! During an event, the tables will be inaccessible to non-team users, however, you'll still be able to access the Casual Games Category. Feel free to use those at any time.
 
-?notes <@722841912695980042>
+> 9. Does Corgi log any of our details?
+The only logs Corgi keeps are logs of commands you use in this server. When you use a command that effects a user or role (such as adding a user to a role, or changing your team's colour) Corgi will log this, along with your nickname, ID, and the time of your action. 
+
+> 10. Corgi isn't working properly, what do I do?
+If Corgi is "misbehaving" please give me (Thom) a ping. If he's offline I'll give him a (metaphoric) kick, and if it's a behaviour "feature" I'll do my best to fix it promptly. Of course, any "user errors" will receive the appropriate level of mocking. ;) If you're after a new feature, please instead raise this as an issue on my Github (see `$GitHub`). Thanks.
