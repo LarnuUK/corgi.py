@@ -629,7 +629,7 @@ Thanks for joining the tournament, and good luck!"""
                         elif guildchannel.type.name == "voice" and "game" in guildchannel.name.lower():
                             print("Setting connect and speak permissions")
                             await guildchannel.set_permissions(everyone,view_channel=False)
-                await message.channel.send("Server is now open to everyone.")
+                await message.channel.send("Server is now closed to everyone.")
                 embed = discord.Embed(title="Close Server to Public", color=0xcc2222) 
                 embed.add_field(name="Opened By", value=message.author.display_name, inline=False)
                 embed.add_field(name="Opened ID", value=message.author.id, inline=False)
