@@ -10,6 +10,7 @@ $Colours: Returns a list of predefined colours for teams.
 
 **VTC Committee only commands:**
 `$AddCaptain` - Gives a user the Team Captain Role. Must be followed by a mentioned user: for example `$AddCaptain @Larnu#1860` (You cannot make a user who already has a role a Team Captain).
+`$RemoveCaptain` - Removes a user from the Team Captain Role. If they have already created a Team, you will be asked whether you wish to give the Captain Role to another member, or delete the entire team. *Deleting the team cannot be undone.*
 `$AddJudge` - Gives a user the Judge Role. Must be followed by a mentioned user (You cannot make a user who already has a role a Judge).
 `$AddHeadJudge` - Gives a user the Head Judge and Judge Roles. Must be followed by a mentioned user (You cannot make a user who already had a role a Judge). Please note this will also error if you try to give a Judge the Head Judge Role *(This might be fixed. Work around is to remove the Judge Role and then give the Head Judge Role.)*
 `$RemoveJudge` - Removes a user from the (Head) Judge Role(s).
