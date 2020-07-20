@@ -75,7 +75,7 @@ async def on_message(message):
 
     #Find Bot-logs channel. There is probably a better way than this though.
     for channel in message.guild.channels:
-        if channel.name == "bot-logs":
+        if channel.name == "corgi-logs":
             logchannel = channel
             break
 
