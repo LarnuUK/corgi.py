@@ -228,6 +228,107 @@ Thanks for joining the tournament, and good luck!"""
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
             return
+        
+        #Remove Captain Role from a User
+        if message.content.lower().startswith("$removecaptain"):
+            if isCommittee == False:
+                await message.channel.send("Only Committee members can use that command.")
+            elif len(message.mentions) == 0:
+                await message.channel.send("Needs a user to give Team Captain role.")
+            elif len(message.mentions[0].roles) > 2:
+                if message.mentions[0].roles[1].name == "Team Captain":
+                    teamrole = message.mentions[0].roles[2]
+                else:
+                    teamrole = message.mentions[0].roles[1]
+                response = "User has already created a Team. Do you want to delete the team, or make a different member of the Team the captain? To delete the team, respond with \"`DELETE " + teamrole.name.upper() + "`\" (*this action cannot be undone*). To change the captain to a different member, please ping the new captain."
+                await message.channel.send(response.format(message))
+                def sameuserchannel(m):
+                    return m.channel == message.channel and m.author == message.author
+                reply = await client.wait_for('message',check=sameuserchannel)
+                if reply.content == "DELETE " + teamrole.name.upper():
+                    response = "Deleting Team " + teamrole.name + "."
+                    await message.channel.send(response.format(message))
+                    guildcategories = message.guild.categories
+                    for category in guildcategories:
+                        if category.name.lower() == teamrole.name.lower():
+                            channels = category.channels
+                            for channel in channels:
+                                await channel.delete()
+                            await category.delete()
+                            break
+                    response = "The team " + teamrole.name + " has been deleted."
+                    await message.channel.send(response.format(message))
+                    colour = teamrole.color
+                    embed = discord.Embed(title="Team Deleted", color=colour) #description=message.mentions[0].display_name
+                    embed.add_field(name="Removed By", value=message.author.display_name, inline=False)
+                    embed.add_field(name="Removed ID", value=message.author.id, inline=False)
+                    embed.add_field(name="Team Name", value=teamrole.name, inline=False)
+                    now = datetime.utcnow()
+                    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                    await logchannel.send(embed=embed)
+                    await teamrole.delete()
+                    role = discord.utils.get(message.guild.roles, name="Team Captain")
+                    await message.mentions[0].remove_roles(role)
+                    response = "{0.mentions[0].display_name} has been removed from the Team Captain Role."
+                    await message.channel.send(response.format(message))
+                    embed = discord.Embed(title="Remove Team Captain", color=0xa551be) #description=message.mentions[0].display_name
+                    embed.add_field(name="Removed By", value=message.author.display_name, inline=False)
+                    embed.add_field(name="Removed ID", value=message.author.id, inline=False)
+                    embed.add_field(name="Captain Removed", value=message.mentions[0].display_name, inline=False)
+                    embed.add_field(name="Captain ID", value=message.mentions[0].id, inline=False)
+                    now = datetime.utcnow()
+                    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                    await logchannel.send(embed=embed)
+                elif len(reply.mentions) == 1:
+                    inteam = False;
+                    for replyrole in reply.mentions[0].roles:
+                        if replyrole.name == teamrole.name:
+                            inteam = True;
+                            break
+                    if inteam == True:
+                        response = "{0.mentions[0].display_name} has been removed from the Team Captain Role."
+                        await message.channel.send(response.format(message))
+                        role = discord.utils.get(message.guild.roles, name="Team Captain")
+                        await message.mentions[0].remove_roles(role)
+                        response = "{0.mentions[0].display_name} has been removed from the Team Captain Role."
+                        embed = discord.Embed(title="Remove Team Captain", color=0xa551be) #description=message.mentions[0].display_name
+                        embed.add_field(name="Removed By", value=message.author.display_name, inline=False)
+                        embed.add_field(name="Removed ID", value=message.author.id, inline=False)
+                        embed.add_field(name="Captain Removed", value=message.mentions[0].display_name, inline=False)
+                        embed.add_field(name="Captain ID", value=message.mentions[0].id, inline=False)
+                        now = datetime.utcnow()
+                        embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                        await logchannel.send(embed=embed)
+                        response = reply.mentions[0].display_name + " has been added to the Team Captain Role."
+                        await message.channel.send(response.format(message))
+                        await reply.mentions[0].add_roles(role)
+                        embed = discord.Embed(title="Add Team Captain", color=0xa551be) #description=message.mentions[0].display_name
+                        embed.add_field(name="Added By", value=message.author.display_name, inline=False)
+                        embed.add_field(name="Added ID", value=message.author.id, inline=False)
+                        embed.add_field(name="Captain Added", value=reply.mentions[0].display_name, inline=False)
+                        embed.add_field(name="Captain ID", value=reply.mentions[0].id, inline=False)
+                        now = datetime.utcnow()
+                        embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                        await logchannel.send(embed=embed)
+                    else:
+                        response = "User is not in the same team. YOu can only promote a member in the same team. Aborted removing {0.mentions[0].display_name} from the Team Captain Role."
+                        await message.channel.send(response.format(message))
+                else:
+                    response = "Aborted removing {0.mentions[0].display_name} from the Team Captain Role."
+                    await message.channel.send(response.format(message))
+            else:
+                role = discord.utils.get(message.guild.roles, name="Team Captain")
+                await message.mentions[0].remove_roles(role)
+                response = "{0.mentions[0].display_name} has been removed from the Team Captain Role."
+                embed = discord.Embed(title="Remove Team Captain", color=0xa551be) #description=message.mentions[0].display_name
+                embed.add_field(name="Removed By", value=message.author.display_name, inline=False)
+                embed.add_field(name="Removed ID", value=message.author.id, inline=False)
+                embed.add_field(name="Captain Removed", value=message.mentions[0].display_name, inline=False)
+                embed.add_field(name="Captain ID", value=message.mentions[0].id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                await logchannel.send(embed=embed)
+            return
 
         #Give someone the Judge Rank
         if message.content.lower().startswith("$addjudge"):
@@ -452,7 +553,8 @@ Thanks for joining the tournament, and good luck!"""
                     #Create the Category and Channels
                     newcategory = await guild.create_category(teamname)
                     #await newcategory.edit(position=5) #Decided against this.
-                    talkrights = {guild.default_role: discord.PermissionOverwrite(read_messages=False),guild.me: discord.PermissionOverwrite(read_messages=True)}
+                    botrole = discord.utils.get(message.guild.roles, name="Bots")
+                    talkrights = {guild.default_role: discord.PermissionOverwrite(read_messages=False),botrole: discord.PermissionOverwrite(read_messages=True)}
                     newtalk = await guild.create_text_channel(name="Team Chat",category=newcategory,overwrites=talkrights)
                     await newtalk.set_permissions(newrole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True)
                     await newtalk.set_permissions(CommitteeRole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True)
