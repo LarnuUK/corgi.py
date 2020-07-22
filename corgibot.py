@@ -46,7 +46,13 @@ async def on_message(message):
             break
         if role.name == "Team Captain":
             isCaptain = True
-            break        
+            break     
+
+    if message.clean_content.lower() == "time for bed @corgi":
+        response = "*Stretches and gets into bed.*"
+        await message.channel.send(response.format(message))
+        sys.exit()
+        return
 
     for mentions in message.mentions:
         if mentions.id == message.guild.me.id:
