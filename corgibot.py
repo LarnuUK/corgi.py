@@ -342,22 +342,32 @@ Thanks for joining the tournament, and good luck!"""
                 await message.channel.send("Only Committee members can use that command.")
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to give Judge role.")
-            elif len(message.mentions[0].roles) > 1:
-                await message.channel.send("User already has a server role and cannot be made a Judge.")
             else:
-                role = discord.utils.get(message.guild.roles, name="Judge")
-                await message.mentions[0].add_roles(role)
-                response = "{0.mentions[0].display_name} has been given the Judge Role."
-                await message.channel.send(response.format(message))
-                #Log details
-                embed = discord.Embed(title="Add Judge", color=discord.Colour.blue()) #description=message.mentions[0].display_name
-                embed.add_field(name="Added By", value=message.author.display_name, inline=False)
-                embed.add_field(name="Added ID", value=message.author.id, inline=False)
-                embed.add_field(name="Judge Added", value=message.mentions[0].display_name, inline=False)
-                embed.add_field(name="Judge ID", value=message.mentions[0].id, inline=False)
-                now = datetime.utcnow()
-                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
-                await logchannel.send(embed=embed)
+                roles = message.mentions[0].roles
+                inteam = False
+                for role in roles:
+                    if role.name.lower() == "judge":
+                        await message.channel.send("User is already a Judge...")    
+                        return
+                    elif role.name.lower() not in ("head judge","vtc committee","@everyone"):
+                        inteam = True
+                        break
+                if inteam == True:
+                    await message.channel.send("User is in a team and cannot be made a Judge.")
+                else:
+                    role = discord.utils.get(message.guild.roles, name="Judge")
+                    await message.mentions[0].add_roles(role)
+                    response = "{0.mentions[0].display_name} has been given the Judge Role."
+                    await message.channel.send(response.format(message))
+                    #Log details
+                    embed = discord.Embed(title="Add Judge", color=discord.Colour.blue()) #description=message.mentions[0].display_name
+                    embed.add_field(name="Added By", value=message.author.display_name, inline=False)
+                    embed.add_field(name="Added ID", value=message.author.id, inline=False)
+                    embed.add_field(name="Judge Added", value=message.mentions[0].display_name, inline=False)
+                    embed.add_field(name="Judge ID", value=message.mentions[0].id, inline=False)
+                    now = datetime.utcnow()
+                    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                    await logchannel.send(embed=embed)
             return
 
 
@@ -367,24 +377,34 @@ Thanks for joining the tournament, and good luck!"""
                 await message.channel.send("Only Committee members can use that command.")
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to give Head Judge role.")
-            elif len(message.mentions[0].roles) > 1:
-                await message.channel.send("User already has a server role and cannot be made a Judge.")
             else:
-                role = discord.utils.get(message.guild.roles, name="Judge")
-                await message.mentions[0].add_roles(role)
-                role = discord.utils.get(message.guild.roles, name="Head Judge")
-                await message.mentions[0].add_roles(role)
-                response = "{0.mentions[0].display_name} has been given the Head Judge Role."
-                await message.channel.send(response.format(message))
-                #Log details
-                embed = discord.Embed(title="Add Head Judge", color=discord.Colour.dark_blue()) #description=message.mentions[0].display_name
-                embed.add_field(name="Added By", value=message.author.display_name, inline=False)
-                embed.add_field(name="Added ID", value=message.author.id, inline=False)
-                embed.add_field(name="Head Judge Added", value=message.mentions[0].display_name, inline=False)
-                embed.add_field(name="Head Judge ID", value=message.mentions[0].id, inline=False)
-                now = datetime.utcnow()
-                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
-                await logchannel.send(embed=embed)
+                roles = message.mentions[0].roles
+                inteam = False
+                for role in roles:
+                    if role.name.lower() == "head judge":
+                        await message.channel.send("User is already a Head Judge...")    
+                        return
+                    elif role.name.lower() not in ("judge","vtc committee","@everyone"):
+                        inteam = True
+                        break
+                if inteam == True:
+                    await message.channel.send("User is in a team and cannot be made a Judge.")
+                else:
+                    role = discord.utils.get(message.guild.roles, name="Judge")
+                    await message.mentions[0].add_roles(role)
+                    role = discord.utils.get(message.guild.roles, name="Head Judge")
+                    await message.mentions[0].add_roles(role)
+                    response = "{0.mentions[0].display_name} has been given the Head Judge Role."
+                    await message.channel.send(response.format(message))
+                    #Log details
+                    embed = discord.Embed(title="Add Head Judge", color=discord.Colour.dark_blue()) #description=message.mentions[0].display_name
+                    embed.add_field(name="Added By", value=message.author.display_name, inline=False)
+                    embed.add_field(name="Added ID", value=message.author.id, inline=False)
+                    embed.add_field(name="Head Judge Added", value=message.mentions[0].display_name, inline=False)
+                    embed.add_field(name="Head Judge ID", value=message.mentions[0].id, inline=False)
+                    now = datetime.utcnow()
+                    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                    await logchannel.send(embed=embed)
             return
 
         if message.content.lower().startswith("$removejudge"):
