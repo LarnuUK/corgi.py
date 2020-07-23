@@ -120,7 +120,7 @@ async def on_message(message):
         hours = message.content[7:9]
         minutes = message.content[10:12]
         seconds = "00"
-        reason = message.content[13:]
+        reason = message.clean_content[13:]
         if re.match("[0-9][0-9]:[0-5][0-9]",timer):
             response = "Setting timer for " + str(int(hours)) + " hour(s) and " + str(int(minutes)) + " minute(s). Let the count down begin!"
             await message.channel.send(response.format(message))
