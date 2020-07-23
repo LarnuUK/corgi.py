@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
+from rulewordings import throwrules, slamrules
 
 load_dotenv()
 key = os.getenv('DISCORD_KEY')
@@ -52,6 +53,18 @@ async def on_message(message):
         response = "*Stretches and gets into bed.*"
         await message.channel.send(response.format(message))
         sys.exit()
+        return
+
+    if message.content.lower() == "how i throw":
+        rules = throwrules()
+        for rule in rules:
+            await message.channel.send(rule.format(message))
+        return
+
+    if message.content.lower() == "how i slam":
+        rules = slamrules()
+        for rule in rules:
+            await message.channel.send(rule.format(message))
         return
 
     for mentions in message.mentions:
