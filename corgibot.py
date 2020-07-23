@@ -47,7 +47,19 @@ async def on_message(message):
             break
         if role.name == "Team Captain":
             isCaptain = True
-            break     
+            break
+
+    #random sticks     
+    rng = random.randint(1,100)
+    #stick = discord.utils.get(message.guild.emojis, name='corgistick') 
+    stick = client.get_emoji(735827082151723029)
+    if rng == 50:        
+        if stick:
+            await message.add_reaction(stick)
+
+    if "corgistick" in message.content:
+        response = "No take! *Only* throw."
+        await message.channel.send(response.format(message))
 
     if message.clean_content.lower() == "time for bed @corgi":
         response = "*Stretches and gets into bed.*"
