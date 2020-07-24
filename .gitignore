@@ -130,3 +130,6 @@ dmypy.json
 
 #Bot Key 
 bot.key
+
+#In progress files
+*.*~
