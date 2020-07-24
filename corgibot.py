@@ -56,6 +56,10 @@ async def on_message(message):
     if rng == 50:        
         if stick:
             await message.add_reaction(stick)
+    
+    if rng == 100:        
+        response=":corgilurk:"
+        await message.channel.send(response.format(message))
 
     if "corgistick" in message.content:
         response = "No take! *Only* throw."
