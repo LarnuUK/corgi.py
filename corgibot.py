@@ -7,6 +7,8 @@ from discord.utils import get
 from dotenv import load_dotenv
 from rulewordings import throwrules, slamrules
 
+directory = os.path.dirname(os.path.realpath(__file__))
+
 load_dotenv()
 key = os.getenv('DISCORD_KEY')
 status = os.getenv('DISCORD_STATUS')
@@ -53,13 +55,14 @@ async def on_message(message):
     rng = random.randint(1,100)
     #stick = discord.utils.get(message.guild.emojis, name='corgistick') 
     stick = client.get_emoji(735827082151723029)
+    lurk = client.get_emoji(736190606254145548)
     if rng == 50:        
         if stick:
             await message.add_reaction(stick)
     
     if rng == 100:        
-        response=":corgilurk:"
-        await message.channel.send(response.format(message))
+        image = directory + "/Images/corgilurk.gif"
+        await message.channel.send(file=discord.File(image))
 
     if "corgistick" in message.content:
         response = "No take! *Only* throw."
