@@ -229,7 +229,7 @@ async def on_message(message):
     if str(message.channel).lower().startswith("bot"):
 
         if message.content.lower() == "$colours":
-            response = "You can choose from any of the following colours: *" + ", ".join(colours) + "*"
+            response = "You can choose from any of the following colours: *" + ", ".join(colours) + "*. Alternatively you can use random for a random colour, or provide your own 6 digit hex code."
             await message.channel.send(response.format(message))
             return
 
@@ -669,7 +669,7 @@ Thanks for joining the tournament, and good luck!"""
                     await message.channel.send("You need to have created your team before you can set their colour.")
                 elif message.content.lower() == "$teamcolour":
                     await message.channel.send("You must supply a colour. Either provide a colour hex, or use one of the preprogrammed colours. See `$colours` or <https://htmlcolorcodes.com/color-picker/> for ideas.")
-                elif not re.match("[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]",teamcolour) and colours.count(teamcolour) == 0:
+                elif not re.match("[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]",teamcolour) and colours.count(teamcolour) == 0 and not teamcolour == "random":
                     await message.channel.send("Invalid hex or predefined colour.")
                 else:
                     if message.author.roles[1].name == "Team Captain":
@@ -680,6 +680,10 @@ Thanks for joining the tournament, and good luck!"""
                         colour = colourings[teamcolour]
                         await teamrole.edit(colour=discord.Colour(colour.value))
                         embed = discord.Embed(title="Change Team Colour", color=colour.value) 
+                    elif teamcolour == "random":
+                        colour = int("0x"+str(randomcolour()),16)
+                        await teamrole.edit(colour=discord.Colour(colour))
+                        embed = discord.Embed(title="Change Team Colour", color=colour) 
                     else:
                         colour = int("0x"+teamcolour,16)
                         await teamrole.edit(colour=discord.Colour(colour))
