@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import discord, discord.utils, random, os, re, json, sys, time
+import discord, discord.utils, random, os, re, json, sys, time, secrets
 from os import path
 from datetime import datetime, timedelta
 from discord.ext import commands
@@ -18,6 +18,10 @@ colours = ["default","teal","dark teal","green","dark green","blue","dark blue",
 colourings = {"default":discord.Colour.default(),"teal":discord.Colour.teal(),"dark teal":discord.Colour.dark_teal(),"green":discord.Colour.green(),"dark green":discord.Colour.dark_green(),"blue":discord.Colour.blue(),"dark blue":discord.Colour.dark_blue(),"purple":discord.Colour.purple(),"dark purple":discord.Colour.dark_purple(),"magenta":discord.Colour.magenta(),"dark magenta":discord.Colour.dark_magenta(),"gold":discord.Colour.gold(),"dark gold":discord.Colour.dark_gold(),"orange":discord.Colour.orange(),"dark orange":discord.Colour.dark_orange(),"red":discord.Colour.red(),"dark red":discord.Colour.dark_red(),"lighter grey":discord.Colour.lighter_grey(),"dark grey":discord.Colour.dark_grey(),"light grey":discord.Colour.light_grey(),"darker grey":discord.Colour.darker_grey(),"blurple":discord.Colour.blurple(),"greyple":discord.Colour.greyple()}
 
 client = discord.Client()
+
+def randomcolour():
+    colour = secrets.token_hex(3)
+    return colour
 
 @client.event
 async def on_ready():
@@ -43,13 +47,10 @@ async def on_message(message):
             isThom = True
         if role.id == "VTC Committee" or role.name == "Thom":
             isCommittee = True
-            break
         if role.id == "Judge":
             isJudge = True
-            break
         if role.name == "Team Captain":
             isCaptain = True
-            break
 
     #random sticks     
     rng = random.randint(1,100)
@@ -584,9 +585,11 @@ Thanks for joining the tournament, and good luck!"""
                 #Check Team Captain is already in a Team
                 if len(message.author.roles) == 2:
                     newrole = await guild.create_role(name=teamname, hoist=True)
+                    colour = int("0x"+str(randomcolour()),16)
+                    await newrole.edit(colour=discord.Colour(colour))
                     await newrole.edit(position=2) 
                     await CaptainRole.edit(position=1)
-                    response = "Created team " + teamname +"."
+                    response = "Created role " + teamname +"."
                     await message.channel.send(response)
                     role = discord.utils.get(message.guild.roles, name=teamname)
                     await message.author.add_roles(role)
@@ -610,21 +613,22 @@ Thanks for joining the tournament, and good luck!"""
                     await message.channel.send("Table Permissions set. Creating team channels.")
                     #Create the Category and Channels
                     newcategory = await guild.create_category(teamname)
-                    #await newcategory.edit(position=5) #Decided against this.
+                    await newcategory.edit(position=6) 
                     botrole = discord.utils.get(message.guild.roles, name="Bots")
                     talkrights = {guild.default_role: discord.PermissionOverwrite(read_messages=False),botrole: discord.PermissionOverwrite(read_messages=True)}
                     newtalk = await guild.create_text_channel(name="Team Chat",category=newcategory,overwrites=talkrights)
                     await newtalk.set_permissions(newrole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True)
-                    await newtalk.set_permissions(CommitteeRole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True)
-                    await newtalk.set_permissions(HeadJudgeRole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True)
+                    await newtalk.set_permissions(CaptainRole, manage_messages=True)
+                    #await newtalk.set_permissions(CommitteeRole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True)
+                    #await newtalk.set_permissions(HeadJudgeRole, read_messages=True, send_messages=True, embed_links=True, attach_files=True, read_message_history=True, use_external_emojis=True)
                     chatrights = {guild.default_role: discord.PermissionOverwrite(view_channel=False)}
                     newchat = await guild.create_voice_channel(name="Team Talk",category=newcategory,overwrites=chatrights)
                     await newchat.set_permissions(newrole,view_channel=True,connect=True,speak=True)
-                    await newchat.set_permissions(CommitteeRole,view_channel=True,connect=True,speak=True)
-                    await newchat.set_permissions(HeadJudgeRole,view_channel=True,connect=True,speak=True)
+                    #await newchat.set_permissions(CommitteeRole,view_channel=True,connect=True,speak=True)
+                    #await newchat.set_permissions(HeadJudgeRole,view_channel=True,connect=True,speak=True)
                     await message.channel.send("New Team created.")
                     #Log details
-                    embed = discord.Embed(title="Create New Team", color=0x999999) 
+                    embed = discord.Embed(title="Create New Team", color=colour) 
                     embed.add_field(name="Created By", value=message.author.display_name, inline=False)
                     embed.add_field(name="Created ID", value=message.author.id, inline=False)
                     embed.add_field(name="Team Name", value=teamname, inline=False)
