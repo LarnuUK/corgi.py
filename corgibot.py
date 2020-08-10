@@ -668,7 +668,7 @@ Thanks for joining the tournament, and good luck!"""
                 if len(message.author.roles) == 2:
                     await message.channel.send("You need to have created your team before you can set their colour.")
                 elif message.content.lower() == "$teamcolour":
-                    await message.channel.send("You must supply a colour. Either provide a colour hex, or use one of the preprogrammed colours. See `$colours` or <https://htmlcolorcodes.com/color-picker/> for ideas.")
+                    await message.channel.send("You must supply a colour. Either provide a colour hex, ask for a random colour,or use one of the preprogrammed colours. See `$colours` or <https://htmlcolorcodes.com/color-picker/> for ideas.")
                 elif not re.match("[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]",teamcolour) and colours.count(teamcolour) == 0 and not teamcolour == "random":
                     await message.channel.send("Invalid hex or predefined colour.")
                 else:
