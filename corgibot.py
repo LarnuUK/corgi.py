@@ -570,12 +570,13 @@ Thanks for joining the tournament, and good luck!"""
                         return
                     elif guildrole.name == "Team Captain":
                         CaptainRole = guildrole
-                    elif guildrole.name == "VTC Committee":
-                        CommitteeRole = guildrole
-                    elif guildrole.name == "Judge":
-                        JudgeRole = guildrole
-                    elif guildrole.name == "Head Judge":
-                        HeadJudgeRole = guildrole
+                        break #Don't forget to get rid of this if we expand in the future.
+                    #elif guildrole.name == "VTC Committee":
+                    #    CommitteeRole = guildrole
+                    #elif guildrole.name == "Judge":
+                    #    JudgeRole = guildrole
+                    #elif guildrole.name == "Head Judge":
+                    #    HeadJudgeRole = guildrole
                 guildcategories = guild.categories
                 for category in guildcategories:
                     if category.name.lower() == teamname.lower():
