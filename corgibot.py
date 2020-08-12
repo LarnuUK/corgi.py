@@ -45,9 +45,11 @@ async def on_message(message):
         #As people, by design, can't have multiple rules, then we can safely break and not loop around 40~ roles
         if role.name == "Thom":
             isThom = True
-        if role.id == "VTC Committee" or role.name == "Thom":
+        if role.name == "VTC Committee" or role.name == "Thom":
             isCommittee = True
-        if role.id == "Judge":
+        if role.name == "Head Judge":
+            isHeadJudge = True
+        if role.name == "Judge":
             isJudge = True
         if role.name == "Team Captain":
             isCaptain = True
@@ -235,7 +237,7 @@ async def on_message(message):
 
         #Give someone the Team Captain Rank
         if message.content.lower().startswith("$addcaptain"):
-            if isCommittee == False:
+            if isCommittee == False and isHeadJudge == False:
                 await message.channel.send("Only Committee members can use that command.")
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to give Team Captain role.")
@@ -270,7 +272,7 @@ Thanks for joining the tournament, and good luck!"""
         
         #Remove Captain Role from a User
         if message.content.lower().startswith("$removecaptain"):
-            if isCommittee == False:
+            if isCommittee == False and isHeadJudge == False:
                 await message.channel.send("Only Committee members can use that command.")
             elif len(message.mentions) == 0:
                 await message.channel.send("Needs a user to give Team Captain role.")
