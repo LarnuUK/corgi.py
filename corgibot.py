@@ -562,6 +562,10 @@ Thanks for joining the tournament, and good luck!"""
                 return
             else:
                 teamname = message.content[10:]
+                if len(teamname.replace(" ","")) == 0:
+                    response = "You need a name for your team, you silly!"
+                    await message.channel.send(response)
+                    return
                 #Check if the team exists
                 guild = message.guild
                 guildroles = guild.roles
