@@ -230,6 +230,30 @@ async def on_message(message):
     #Want these commands in the right channel
     if str(message.channel).lower().startswith("bot"):
 
+        if message.content.lower() == "$rolestats":
+            if isCommittee == False and isHeadJudge == False:
+                await message.channel.send("Only Committee members can use that command.")
+            else:
+                embed = discord.Embed(title="Role Statistics", color=discord.Colour.green())
+                guild = message.guild
+                guildroles = guild.roles
+                members = guild.members
+                for guildrole in guildroles:
+                    print("Getting count for " + guildrole.name)
+                    membercount = 0
+                    for member in members:
+                        for memberrole in member.roles:
+                            if memberrole.name == guildrole.name:
+                                membercount += 1
+                    embed.add_field(name=guildrole.name, value=membercount, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Reported: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                await logchannel.send(embed=embed)
+                response = "Role stats have been sent to the Log Channel"
+                await message.channel.send(response.format(message))
+                    
+            return
+
         if message.content.lower() == "$colours":
             response = "You can choose from any of the following colours: *" + ", ".join(colours) + "*. Alternatively you can use random for a random colour, or provide your own 6 digit hex code."
             await message.channel.send(response.format(message))
