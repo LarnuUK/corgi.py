@@ -17,6 +17,7 @@ $Colours: Returns a list of predefined colours for teams.
 `$AddStreamer` - Gives a user the Streamer Roler. Must be followed by a mentioned user (You cannot make a user who already have a role a Judge).
 `$RemoveStreamer` - Removes a user from the Stream Role.
 `$heret` - Sets a timer for the requested time period. Time must in the format `hh:mm`. Must be followed by a message. For example `$heret 01:30 Dice down!`. On expiry the @here role will be pinged.
+`$RoleStats` - Sends details of the User Role Counts to the Log channel.
 
 -----
 
