@@ -546,7 +546,7 @@ Thanks for joining the tournament, and good luck!"""
                 response = "{0.mentions[0].display_name} has been given the Streamer Role."
                 await message.channel.send(response.format(message))
                 #Log details
-                embed = discord.Embed(title="Add Judge", color=0x9147ff) 
+                embed = discord.Embed(title="Add Streamer", color=0x9147ff) 
                 embed.add_field(name="Added By", value=message.author.display_name, inline=False)
                 embed.add_field(name="Added ID", value=message.author.id, inline=False)
                 embed.add_field(name="Judge Added", value=message.mentions[0].display_name, inline=False)
