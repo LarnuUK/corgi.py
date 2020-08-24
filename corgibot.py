@@ -745,6 +745,7 @@ Thanks for joining the tournament, and good luck!"""
                 await message.channel.send(response.format(message))
                 #Log details
                 embed = discord.Embed(title="Add Player to Team", color=teamrole.color) 
+                embed.add_field(name="Team Name", value=teamrole.name, inline=False)
                 embed.add_field(name="Added By", value=message.author.display_name, inline=False)
                 embed.add_field(name="Added ID", value=message.author.id, inline=False)
                 embed.add_field(name="New Player", value=message.mentions[0].display_name, inline=False)
