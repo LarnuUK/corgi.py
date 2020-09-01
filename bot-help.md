@@ -1,5 +1,6 @@
 **All User commands:**
 `$Roll` - rolls a D6.
+`$Roll {n}d{s}` - rolls a `n` dice with `s` sides. For example `$roll 2d6` or `$roll 1d3`.
 `$Flip` - Flips a coin.
 `$GitHub` - Provides a link to Thom's github.
 `$Timer` - Sets a timer for the requested time period. Time must in the format `hh:mm`. For example `$Timer 03:00` will set a timer for 3 hours. Can optionally be followed by a message. On expiry the user who created it will receive a ping.
