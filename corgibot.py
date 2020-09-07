@@ -880,6 +880,13 @@ Thanks for joining the tournament, and good luck!"""
                         if guildchannel.type.name == "voice" and "game" in guildchannel.name.lower():
                             print("Changing max connected users.")
                             await guildchannel.edit(user_limit=4)
+                await message.channel.send("Game VCs are now limited to 4 users.")
+                embed = discord.Embed(title="Limit Game VC Connections", color=colourings["orange"]) 
+                embed.add_field(name="Limited By", value=message.author.display_name, inline=False)
+                embed.add_field(name="Limiting ID", value=message.author.id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                await logchannel.send(embed=embed)
             return
 
         if message.content.lower() == "$unlimitvcs":
@@ -894,6 +901,13 @@ Thanks for joining the tournament, and good luck!"""
                         if guildchannel.type.name == "voice" and "game" in guildchannel.name.lower():
                             print("Changing max connected users.")
                             await guildchannel.edit(user_limit=0)
+                await message.channel.send("Game VCs can now have unlimited users.")
+                embed = discord.Embed(title="Unlimit Game VC Connections", color=colourings["gold"]) 
+                embed.add_field(name="Unlimited By", value=message.author.display_name, inline=False)
+                embed.add_field(name="Unlimiting ID", value=message.author.id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                await logchannel.send(embed=embed)
             return
                             
 
