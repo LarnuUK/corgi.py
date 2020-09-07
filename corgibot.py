@@ -872,6 +872,7 @@ Thanks for joining the tournament, and good luck!"""
             if isThom == False:
                 await message.channel.send("Only Thom can use that command.")
             else:
+                await message.channel.send("Limiting Game VCs to 4 users.")
                 guild = message.guild
                 guildchannels = guild.channels
                 for guildchannel in guildchannels:
@@ -893,6 +894,7 @@ Thanks for joining the tournament, and good luck!"""
             if isThom == False:
                 await message.channel.send("Only Thom can use that command.")
             else:
+                await message.channel.send("Removing Limit on Game VCs.")
                 guild = message.guild
                 guildchannels = guild.channels
                 for guildchannel in guildchannels:
