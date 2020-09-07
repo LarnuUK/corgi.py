@@ -868,4 +868,33 @@ Thanks for joining the tournament, and good luck!"""
                 await logchannel.send(embed=embed)
             return
 
+        if message.content.lower() == "$limitvcs":
+            if isThom == False:
+                await message.channel.send("Only Thom can use that command.")
+            else:
+                guild = message.guild
+                guildchannels = guild.channels
+                for guildchannel in guildchannels:
+                    if guildchannel.name.lower().startswith('table'):
+                        print(guildchannel.name)
+                        if guildchannel.type.name == "voice" and "game" in guildchannel.name.lower():
+                            print("Changing max connected users.")
+                            await guildchannel.edit(user_limit=4)
+            return
+
+        if message.content.lower() == "$unlimitvcs":
+            if isThom == False:
+                await message.channel.send("Only Thom can use that command.")
+            else:
+                guild = message.guild
+                guildchannels = guild.channels
+                for guildchannel in guildchannels:
+                    if guildchannel.name.lower().startswith('table'):
+                        print(guildchannel.name)
+                        if guildchannel.type.name == "voice" and "game" in guildchannel.name.lower():
+                            print("Changing max connected users.")
+                            await guildchannel.edit(user_limit=0)
+            return
+                            
+
 client.run(key)

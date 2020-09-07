@@ -34,6 +34,8 @@ Adding/Removing a user from your team's role will grant/remove their access righ
 -----
 
 **God Commands** *(Can only be used by the Server Owner/Administrator)* **:** 
+`$LimitVCs` - Limits the maximum user who can connect to a game VC to 4.
+`$UnlimitVCs` - Removes to limit to the maximum user who can connect to a game VC.
 `$OpenServer` - Allows everyone to access the table text and voice channels
 `$CloseServer` - Removes everyone to access the table text and voice channels
 `$ResetTeams` - Purges all current teams, along with their Categories and Channels, removes all users from the Team Captain Role and then Opens the Server. *This action cannot be undone. It will ask you to confirm the action before it is completed.*
