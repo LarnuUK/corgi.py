@@ -17,6 +17,20 @@ status = os.getenv('DISCORD_STATUS')
 colours = ["default","teal","dark teal","green","dark green","blue","dark blue","purple","dark purple","magenta","dark magenta","gold","dark gold","orange","dark orange","red","dark red","lighter grey", "dark grey", "light grey", "darker grey", "blurple", "greyple"]
 colourings = {"default":discord.Colour.default(),"teal":discord.Colour.teal(),"dark teal":discord.Colour.dark_teal(),"green":discord.Colour.green(),"dark green":discord.Colour.dark_green(),"blue":discord.Colour.blue(),"dark blue":discord.Colour.dark_blue(),"purple":discord.Colour.purple(),"dark purple":discord.Colour.dark_purple(),"magenta":discord.Colour.magenta(),"dark magenta":discord.Colour.dark_magenta(),"gold":discord.Colour.gold(),"dark gold":discord.Colour.dark_gold(),"orange":discord.Colour.orange(),"dark orange":discord.Colour.dark_orange(),"red":discord.Colour.red(),"dark red":discord.Colour.dark_red(),"lighter grey":discord.Colour.lighter_grey(),"dark grey":discord.Colour.dark_grey(),"light grey":discord.Colour.light_grey(),"darker grey":discord.Colour.darker_grey(),"blurple":discord.Colour.blurple(),"greyple":discord.Colour.greyple()}
 
+timezones = {"PST":{"Name":"Pacific Standard Time", "Offset":-8},"PDT":{"Name":"Pacific Daylight Time", "Offset":-7},
+             "MST":{"Name":"Mountain Standard Time", "Offset":-7},"MDT":{"Name":"Mountain Daylight Time", "Offset":-6},
+             "CST":{"Name":"Central Standard Time", "Offset":-6},"CDT":{"Name":"Central Daylight Time", "Offset":-5},
+             "EST":{"Name":"Eastern Standard Time", "Offset":-5},"EDT":{"Name":"Eastern Daylight Time", "Offset":-4},
+             "UTC":{"Name":"Pacific Standard Time", "Offset":0},
+             "GMT":{"Name":"Greenwich Mean Time", "Offset":0},"BST":{"Name":"British Summer Time", "Offset":1},
+             "CET":{"Name":"Central European Time", "Offset":1},"CEST":{"Name":"Central Europe Summer Time", "Offset":2},
+             "WST":{"Name":"(Australian) Western Standard Time", "Offset":8},
+             "ACST":{"Name":"Australian Central Standard Time", "Offset":9.5},"ACDT":{"Name":"Australian Central Daylight Saving Time", "Offset":10.5},
+             "AEST":{"Name":"Australian Eastern Standard Time", "Offset":10},"AEDT":{"Name":"Australian Eastern Daylight Saving Time", "Offset":11},
+             "NZST":{"Name":"New Zealand Standard Time", "Offset":12},"NZDT":{"Name":"New Zealand Daylight Time", "Offset":13}}
+             
+
+
 client = discord.Client()
 
 def randomcolour():
@@ -97,6 +111,50 @@ async def on_message(message):
     if message.content.lower() == ("$github"):
         response = "You can find my master's github here: https://github.com/LarnuUK"
         await message.channel.send(response.format(message))
+        return
+
+    if message.content.lower() == "$timezones":
+        response = "Available timezones are as follows:"
+        for tz in timezones:
+            response = response + "\n- " + tz + " (" + tzname + ")"
+        await message.channel.send(response.format(message))
+        return
+
+    if message.content.lower().startswith("$cest "):
+        time = message.content[6:11]
+        hours = message.content[6:8]
+        minutes = message.content[9:11]
+        timezone = message.content[12:]
+        if re.match("[0-9][0-9]:[0-5][0-9]",time):
+            try:
+                offset = timezones[timezone]
+            except:
+                response = "Invalid or unrecognised timezone. Use $Timezones for a full list of timezones I can convert from CEST."
+                await message.channel.send(response.format(message))
+                return
+            newhours = int(hours) - 2 + int(offset["Offset"])
+            day = ""
+            if not(int(offset["Offset"]) == offset["Offset"]):
+                newminutes = int(minutes) + 30
+            else:
+                newminutes = int(minutes)
+            if newminutes > 59:
+                newminutes = newminutes - 30
+                newhours = newhours + 1
+            elif newminutes < 0:
+                newminutes = newminutes + 30
+                newhours = newhours - 1
+            if newhours > 23:
+                newhours = newhours - 24
+                day = " (+1 day)"
+            elif newhours < 0:
+                newhours = newhours + 24
+                day = " (-1 day)"
+            response = time + " CEST is " +  ("00" + str(newhours))[-2:] + ":" + ("00" + str(newminutes))[-2:] + " " + timezone + day + "."
+            await message.channel.send(response.format(message))
+        else:
+            response = "Invalid Time format. Must be in format `hh:mm`."
+            await message.channel.send(response.format(message))
         return
 
     if message.content.lower() == ("$roll"):

@@ -2,6 +2,8 @@
 `$Roll` - rolls a D6.
 `$Roll {n}d{s}` - rolls a `n` dice with `s` sides. For example `$roll 2d6` or `$roll 1d3`.
 `$Flip` - Flips a coin.
+`$Timezones` - Lists timezones available for the `$CEST` command.
+`$CEST` - Converts a time to designated Timezone. For example `$CEST 09:00 PDT` will convert the time to Pacific Daylight Time. Times must be in the format `hh:mm`. 
 `$GitHub` - Provides a link to Thom's github.
 `$Timer` - Sets a timer for the requested time period. Time must in the format `hh:mm`. For example `$Timer 03:00` will set a timer for 3 hours. Can optionally be followed by a message. On expiry the user who created it will receive a ping.
 
