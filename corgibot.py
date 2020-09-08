@@ -116,6 +116,8 @@ async def on_message(message):
     if message.content.lower() == "$timezones":
         response = "Available timezones are as follows:"
         for tz in timezones:
+            tzdata = timezones[tz]
+            tzname = tzdata["Name"]
             response = response + "\n- " + tz + " (" + tzname + ")"
         await message.channel.send(response.format(message))
         return
