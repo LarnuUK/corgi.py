@@ -24,6 +24,7 @@ timezones = {"PST":{"Name":"Pacific Standard Time", "Offset":-8},"PDT":{"Name":"
              "UTC":{"Name":"Pacific Standard Time", "Offset":0},
              "GMT":{"Name":"Greenwich Mean Time", "Offset":0},"BST":{"Name":"British Summer Time", "Offset":1},
              "CET":{"Name":"Central European Time", "Offset":1},"CEST":{"Name":"Central Europe Summer Time", "Offset":2},
+             "EET":{"Name":"Eastern European Time", "Offset":2},"EEST":{"Name":"Eastern Europe Summer Time", "Offset":3},
              "WST":{"Name":"(Australian) Western Standard Time", "Offset":8},
              "ACST":{"Name":"Australian Central Standard Time", "Offset":9.5},"ACDT":{"Name":"Australian Central Daylight Saving Time", "Offset":10.5},
              "AEST":{"Name":"Australian Eastern Standard Time", "Offset":10},"AEDT":{"Name":"Australian Eastern Daylight Saving Time", "Offset":11},
@@ -118,7 +119,16 @@ async def on_message(message):
         for tz in timezones:
             tzdata = timezones[tz]
             tzname = tzdata["Name"]
-            response = response + "\n- " + tz + " (" + tzname + ")"
+            tzoffset = tzdata["Offset"]
+            if tzoffset < 0:
+                offset = str(int(tzoffset))
+            else:
+                offset = "+" + str(int(tzoffset))
+            if not(int(tzoffset) == tzoffset):
+                offset = offset + ":30"
+            else:
+                offset + offset + ":00"
+            response = response + "\n- " + tz + ": " + tzname + " (UTC" + offset + ")"
         await message.channel.send(response.format(message))
         return
 
