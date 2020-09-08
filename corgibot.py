@@ -21,7 +21,7 @@ timezones = {"PST":{"Name":"Pacific Standard Time", "Offset":-8},"PDT":{"Name":"
              "MST":{"Name":"Mountain Standard Time", "Offset":-7},"MDT":{"Name":"Mountain Daylight Time", "Offset":-6},
              "CST":{"Name":"Central Standard Time", "Offset":-6},"CDT":{"Name":"Central Daylight Time", "Offset":-5},
              "EST":{"Name":"Eastern Standard Time", "Offset":-5},"EDT":{"Name":"Eastern Daylight Time", "Offset":-4},
-             "UTC":{"Name":"Pacific Standard Time", "Offset":0},
+             "UTC":{"Name":"Universal Time Constant", "Offset":0},
              "GMT":{"Name":"Greenwich Mean Time", "Offset":0},"BST":{"Name":"British Summer Time", "Offset":1},
              "CET":{"Name":"Central European Time", "Offset":1},"CEST":{"Name":"Central Europe Summer Time", "Offset":2},
              "EET":{"Name":"Eastern European Time", "Offset":2},"EEST":{"Name":"Eastern Europe Summer Time", "Offset":3},
