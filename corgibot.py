@@ -17,18 +17,18 @@ status = os.getenv('DISCORD_STATUS')
 colours = ["default","teal","dark teal","green","dark green","blue","dark blue","purple","dark purple","magenta","dark magenta","gold","dark gold","orange","dark orange","red","dark red","lighter grey", "dark grey", "light grey", "darker grey", "blurple", "greyple"]
 colourings = {"default":discord.Colour.default(),"teal":discord.Colour.teal(),"dark teal":discord.Colour.dark_teal(),"green":discord.Colour.green(),"dark green":discord.Colour.dark_green(),"blue":discord.Colour.blue(),"dark blue":discord.Colour.dark_blue(),"purple":discord.Colour.purple(),"dark purple":discord.Colour.dark_purple(),"magenta":discord.Colour.magenta(),"dark magenta":discord.Colour.dark_magenta(),"gold":discord.Colour.gold(),"dark gold":discord.Colour.dark_gold(),"orange":discord.Colour.orange(),"dark orange":discord.Colour.dark_orange(),"red":discord.Colour.red(),"dark red":discord.Colour.dark_red(),"lighter grey":discord.Colour.lighter_grey(),"dark grey":discord.Colour.dark_grey(),"light grey":discord.Colour.light_grey(),"darker grey":discord.Colour.darker_grey(),"blurple":discord.Colour.blurple(),"greyple":discord.Colour.greyple()}
 
-timezones = {"PST":{"Name":"Pacific Standard Time", "Offset":-8},"PDT":{"Name":"Pacific Daylight Time", "Offset":-7},
-             "MST":{"Name":"Mountain Standard Time", "Offset":-7},"MDT":{"Name":"Mountain Daylight Time", "Offset":-6},
-             "CST":{"Name":"Central Standard Time", "Offset":-6},"CDT":{"Name":"Central Daylight Time", "Offset":-5},
-             "EST":{"Name":"Eastern Standard Time", "Offset":-5},"EDT":{"Name":"Eastern Daylight Time", "Offset":-4},
-             "UTC":{"Name":"Universal Time Constant", "Offset":0},
-             "GMT":{"Name":"Greenwich Mean Time", "Offset":0},"BST":{"Name":"British Summer Time", "Offset":1},
-             "CET":{"Name":"Central European Time", "Offset":1},"CEST":{"Name":"Central Europe Summer Time", "Offset":2},
-             "EET":{"Name":"Eastern European Time", "Offset":2},"EEST":{"Name":"Eastern Europe Summer Time", "Offset":3},
-             "WST":{"Name":"(Australian) Western Standard Time", "Offset":8},
-             "ACST":{"Name":"Australian Central Standard Time", "Offset":9.5},"ACDT":{"Name":"Australian Central Daylight Saving Time", "Offset":10.5},
-             "AEST":{"Name":"Australian Eastern Standard Time", "Offset":10},"AEDT":{"Name":"Australian Eastern Daylight Saving Time", "Offset":11},
-             "NZST":{"Name":"New Zealand Standard Time", "Offset":12},"NZDT":{"Name":"New Zealand Daylight Time", "Offset":13}}
+timezones = {"PST":{"Name":"Pacific Standard Time", "Offset":-8, "Hours":-8, "Minutes":0},"PDT":{"Name":"Pacific Daylight Time", "Offset":-7, "Hours":-8, "Minutes":0},
+             "MST":{"Name":"Mountain Standard Time", "Offset":-7, "Hours":-7, "Minutes":0},"MDT":{"Name":"Mountain Daylight Time", "Offset":-6, "Hours":-6, "Minutes":0},
+             "CST":{"Name":"Central Standard Time", "Offset":-6, "Hours":-6, "Minutes":0},"CDT":{"Name":"Central Daylight Time", "Offset":-5, "Hours":-5, "Minutes":0},
+             "EST":{"Name":"Eastern Standard Time", "Offset":-5, "Hours":-5, "Minutes":0},"EDT":{"Name":"Eastern Daylight Time", "Offset":-4, "Hours":-4, "Minutes":0},
+             "UTC":{"Name":"Universal Time Constant", "Offset":0, "Hours":0, "Minutes":0},
+             "GMT":{"Name":"Greenwich Mean Time", "Offset":0, "Hours":0, "Minutes":0},"BST":{"Name":"British Summer Time", "Offset":1, "Hours":1, "Minutes":0},
+             "CET":{"Name":"Central European Time", "Offset":1, "Hours":1, "Minutes":0},"CEST":{"Name":"Central Europe Summer Time", "Offset":2, "Hours":2, "Minutes":0},
+             "EET":{"Name":"Eastern European Time", "Offset":2, "Hours":2, "Minutes":0},"EEST":{"Name":"Eastern Europe Summer Time", "Offset":3, "Hours":3, "Minutes":0},
+             "WST":{"Name":"(Australian) Western Standard Time", "Offset":8, "Hours":8, "Minutes":0},
+             "ACST":{"Name":"Australian Central Standard Time", "Offset":9.5, "Hours":9, "Minutes":30},"ACDT":{"Name":"Australian Central Daylight Saving Time", "Offset":10.5, "Hours":10, "Minutes":30},
+             "AEST":{"Name":"Australian Eastern Standard Time", "Offset":10, "Hours":10, "Minutes":0},"AEDT":{"Name":"Australian Eastern Daylight Saving Time", "Offset":11, "Hours":11, "Minutes":0},
+             "NZST":{"Name":"New Zealand Standard Time", "Offset":12, "Hours":12, "Minutes":0},"NZDT":{"Name":"New Zealand Daylight Time", "Offset":13, "Hours":13, "Minutes":0}}
              
 
 
@@ -37,6 +37,13 @@ client = discord.Client()
 def randomcolour():
     colour = secrets.token_hex(3)
     return colour
+
+def validatetz(tz):
+    try:
+        offset = timezones[tz]
+        return True
+    except:
+        return False
 
 @client.event
 async def on_ready():
@@ -121,26 +128,26 @@ async def on_message(message):
             tzdata = timezones[tz]
             tzname = tzdata["Name"]
             tzoffset = tzdata["Offset"]
+            #tzhours = tzdata["Hours"]
+            #tzminutes = tzdata["Minutes"]
             if tzoffset < 0:
-                offset = str(int(tzoffset))
+                offset = str(tzoffset)
             else:
-                offset = "+" + str(int(tzoffset))
-            if not(int(tzoffset) == tzoffset):
-                offset = offset + ":30"
-            else:
-                offset + offset + ":00"
-            response = response + "\n**" + tz + "**: " + tzname + " (UTC" + offset + ")"
+                offset = "+" + str(tzoffset)
+            response = response + "\n**" + tz + "**: " + tzname + " (UTC " + offset + ")"
             #embed.add_field(name=tz, value=tzname + " (UTC" + offset + ")", inline=False)
         # await message.channel.send(response.format(message))
         embed.add_field(name="Timezones", value=response, inline=False)
         await message.channel.send(embed=embed)
         return
 
+    """
+    #We don't need this any more
     if message.content.lower().startswith("$cest "):
         time = message.content[6:11]
         hours = message.content[6:8]
         minutes = message.content[9:11]
-        timezone = message.content[12:]
+        timezone = message.content.upper()[12:]
         if re.match("[0-9][0-9]:[0-5][0-9]",time):
             try:
                 offset = timezones[timezone]
@@ -167,6 +174,50 @@ async def on_message(message):
                 newhours = newhours + 24
                 day = " (-1 day)"
             response = time + " CEST is " +  ("00" + str(newhours))[-2:] + ":" + ("00" + str(newminutes))[-2:] + " " + timezone + day + "."
+            await message.channel.send(response.format(message))
+        else:
+            response = "Invalid Time format. Must be in format `hh:mm`."
+            await message.channel.send(response.format(message))
+        return
+    """
+
+    if message.content.lower().startswith("$") and validatetz(message.content.upper()[1:message.content.index(" ")]):
+        spaceindex = message.content.index(" ")
+        sourcetz = message.content.upper()[1:spaceindex]
+        time = message.content[spaceindex+1:spaceindex+6]
+        hours = message.content[spaceindex+1:spaceindex+3]
+        minutes = message.content[spaceindex+4:spaceindex+6]
+        desttz = message.content.upper()[spaceindex+7:]
+        if re.match("[0-9][0-9]:[0-5][0-9]",time):
+            try:
+                tzdestination = timezones[desttz]
+                tzsource = timezones[sourcetz]
+            except:
+                response = "Invalid or unrecognised timezone. Use $Timezones for a full list of timezones I can convert from CEST."
+                await message.channel.send(response.format(message))
+                return
+            tzdesthours = tzdestination["Hours"]
+            tzdestminutes = tzdestination["Minutes"]
+            tzdestname = tzdestination["Name"]
+            tzsourcehours = tzsource["Hours"]
+            tzsourceminutes = tzsource["Minutes"]
+            tzsourcename = tzsource["Name"]
+            newhours = int(hours) - tzsourcehours + tzdesthours
+            newminutes = int(minutes) - tzsourceminutes + tzdestminutes
+            day = ""
+            if newminutes > 59:
+                newminutes = newminutes - 30
+                newhours = newhours + 1
+            elif newminutes < 0:
+                newminutes = newminutes + 30
+                newhours = newhours - 1
+            if newhours > 23:
+                newhours = newhours - 24
+                day = " (+1 day)"
+            elif newhours < 0:
+                newhours = newhours + 24
+                day = " (-1 day)"
+            response = time + " " + sourcetz + " (" + tzsourcename + ") is " +  ("00" + str(newhours))[-2:] + ":" + ("00" + str(newminutes))[-2:] + " " + desttz +" (" + tzdestname + ")" + day + "."
             await message.channel.send(response.format(message))
         else:
             response = "Invalid Time format. Must be in format `hh:mm`."
