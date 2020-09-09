@@ -115,7 +115,8 @@ async def on_message(message):
         return
 
     if message.content.lower() == "$timezones":
-        response = "Available timezones are as follows:"
+        response = ""
+        embed = discord.Embed(title="Available Timezones", description="Timezones available for the `$CEST` command", color=colourings["dark gold"])
         for tz in timezones:
             tzdata = timezones[tz]
             tzname = tzdata["Name"]
@@ -128,8 +129,11 @@ async def on_message(message):
                 offset = offset + ":30"
             else:
                 offset + offset + ":00"
-            response = response + "\n- " + tz + ": " + tzname + " (UTC" + offset + ")"
-        await message.channel.send(response.format(message))
+            response = response + "\n**" + tz + "**: " + tzname + " (UTC" + offset + ")"
+            #embed.add_field(name=tz, value=tzname + " (UTC" + offset + ")", inline=False)
+        # await message.channel.send(response.format(message))
+        embed.add_field(name="Timezones", value=response, inline=False)
+        await message.channel.send(embed=embed)
         return
 
     if message.content.lower().startswith("$cest "):
