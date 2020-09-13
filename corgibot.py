@@ -884,6 +884,10 @@ Thanks for joining the tournament, and good luck!"""
             return
 
         if message.content.lower().startswith("$addplayer"):
+            if 1 = 1 then:
+                #Hard code, cause lazy.
+                await message.channel.send("This command is currently disabled. Please contact the server owner for the time being.")
+                return
             if isCaptain == False:
                 await message.channel.send("Only Team Captains can use that command.")
             elif len(message.mentions) == 0:
