@@ -123,7 +123,7 @@ async def on_message(message):
 
     if message.content.lower() == "$timezones":
         response = ""
-        embed = discord.Embed(title="Available Timezones", description="Timezones available for the `$CEST` command", color=colourings["dark gold"])
+        embed = discord.Embed(title="Available Timezones", description="Timezones available for the conversion commands (such as `$CEST` and `$NZDT`)", color=colourings["dark gold"])
         for tz in timezones:
             tzdata = timezones[tz]
             tzname = tzdata["Name"]
@@ -141,88 +141,49 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         return
 
-    """
-    #We don't need this any more
-    if message.content.lower().startswith("$cest "):
-        time = message.content[6:11]
-        hours = message.content[6:8]
-        minutes = message.content[9:11]
-        timezone = message.content.upper()[12:]
-        if re.match("[0-9][0-9]:[0-5][0-9]",time):
-            try:
-                offset = timezones[timezone]
-            except:
-                response = "Invalid or unrecognised timezone. Use $Timezones for a full list of timezones I can convert from CEST."
+    if message.content.lower().startswith("$") and " " in message.content:
+        if validatetz(message.content.upper()[1:message.content.index(" ")]):
+            spaceindex = message.content.index(" ")
+            sourcetz = message.content.upper()[1:spaceindex]
+            time = message.content[spaceindex+1:spaceindex+6]
+            hours = message.content[spaceindex+1:spaceindex+3]
+            minutes = message.content[spaceindex+4:spaceindex+6]
+            desttz = message.content.upper()[spaceindex+7:]
+            if re.match("[0-9][0-9]:[0-5][0-9]",time):
+                try:
+                    tzdestination = timezones[desttz]
+                    tzsource = timezones[sourcetz]
+                except:
+                    response = "Invalid or unrecognised timezone. Use $Timezones for a full list of timezones I can convert from CEST."
+                    await message.channel.send(response.format(message))
+                    return
+                tzdesthours = tzdestination["Hours"]
+                tzdestminutes = tzdestination["Minutes"]
+                tzdestname = tzdestination["Name"]
+                tzsourcehours = tzsource["Hours"]
+                tzsourceminutes = tzsource["Minutes"]
+                tzsourcename = tzsource["Name"]
+                newhours = int(hours) - tzsourcehours + tzdesthours
+                newminutes = int(minutes) - tzsourceminutes + tzdestminutes
+                day = ""
+                if newminutes > 59:
+                    newminutes = newminutes - 30
+                    newhours = newhours + 1
+                elif newminutes < 0:
+                    newminutes = newminutes + 30
+                    newhours = newhours - 1
+                if newhours > 23:
+                    newhours = newhours - 24
+                    day = " (+1 day)"
+                elif newhours < 0:
+                    newhours = newhours + 24
+                    day = " (-1 day)"
+                response = time + " " + sourcetz + " (" + tzsourcename + ") is " +  ("00" + str(newhours))[-2:] + ":" + ("00" + str(newminutes))[-2:] + " " + desttz +" (" + tzdestname + ")" + day + "."
                 await message.channel.send(response.format(message))
-                return
-            newhours = int(hours) - 2 + int(offset["Offset"])
-            day = ""
-            if not(int(offset["Offset"]) == offset["Offset"]):
-                newminutes = int(minutes) + 30
             else:
-                newminutes = int(minutes)
-            if newminutes > 59:
-                newminutes = newminutes - 30
-                newhours = newhours + 1
-            elif newminutes < 0:
-                newminutes = newminutes + 30
-                newhours = newhours - 1
-            if newhours > 23:
-                newhours = newhours - 24
-                day = " (+1 day)"
-            elif newhours < 0:
-                newhours = newhours + 24
-                day = " (-1 day)"
-            response = time + " CEST is " +  ("00" + str(newhours))[-2:] + ":" + ("00" + str(newminutes))[-2:] + " " + timezone + day + "."
-            await message.channel.send(response.format(message))
-        else:
-            response = "Invalid Time format. Must be in format `hh:mm`."
-            await message.channel.send(response.format(message))
-        return
-    """
-
-    if message.content.lower().startswith("$") and validatetz(message.content.upper()[1:message.content.index(" ")]):
-        spaceindex = message.content.index(" ")
-        sourcetz = message.content.upper()[1:spaceindex]
-        time = message.content[spaceindex+1:spaceindex+6]
-        hours = message.content[spaceindex+1:spaceindex+3]
-        minutes = message.content[spaceindex+4:spaceindex+6]
-        desttz = message.content.upper()[spaceindex+7:]
-        if re.match("[0-9][0-9]:[0-5][0-9]",time):
-            try:
-                tzdestination = timezones[desttz]
-                tzsource = timezones[sourcetz]
-            except:
-                response = "Invalid or unrecognised timezone. Use $Timezones for a full list of timezones I can convert from CEST."
+                response = "Invalid Time format. Must be in format `hh:mm`."
                 await message.channel.send(response.format(message))
-                return
-            tzdesthours = tzdestination["Hours"]
-            tzdestminutes = tzdestination["Minutes"]
-            tzdestname = tzdestination["Name"]
-            tzsourcehours = tzsource["Hours"]
-            tzsourceminutes = tzsource["Minutes"]
-            tzsourcename = tzsource["Name"]
-            newhours = int(hours) - tzsourcehours + tzdesthours
-            newminutes = int(minutes) - tzsourceminutes + tzdestminutes
-            day = ""
-            if newminutes > 59:
-                newminutes = newminutes - 30
-                newhours = newhours + 1
-            elif newminutes < 0:
-                newminutes = newminutes + 30
-                newhours = newhours - 1
-            if newhours > 23:
-                newhours = newhours - 24
-                day = " (+1 day)"
-            elif newhours < 0:
-                newhours = newhours + 24
-                day = " (-1 day)"
-            response = time + " " + sourcetz + " (" + tzsourcename + ") is " +  ("00" + str(newhours))[-2:] + ":" + ("00" + str(newminutes))[-2:] + " " + desttz +" (" + tzdestname + ")" + day + "."
-            await message.channel.send(response.format(message))
-        else:
-            response = "Invalid Time format. Must be in format `hh:mm`."
-            await message.channel.send(response.format(message))
-        return
+            return
 
     if message.content.lower() == ("$roll"):
         i = random.randint(1,6)
