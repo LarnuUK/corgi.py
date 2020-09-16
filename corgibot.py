@@ -80,7 +80,7 @@ async def on_message(message):
     rng = random.randint(1,100)
     #stick = discord.utils.get(message.guild.emojis, name='corgistick') 
     stick = client.get_emoji(735827082151723029)
-    lurk = client.get_emoji(736190606254145548)
+    #lurk = client.get_emoji(736190606254145548)
     if rng == 50:        
         if stick:
             await message.add_reaction(stick)
