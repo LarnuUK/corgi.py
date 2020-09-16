@@ -93,6 +93,13 @@ async def on_message(message):
         response = "No take! *Only* throw."
         await message.channel.send(response.format(message))
 
+    if "wednesday" in message.content.lower():
+        day_name= ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","Sunday"]
+        day = datetime.utcnow().weekday()
+        if day_name[day] == "Wednesday":
+            image = directory + "/images/wednesday.jpg"
+            await message.channel.send(file=discord.File(image))
+
     if message.clean_content.lower() == "time for bed @corgi":
         response = "*Stretches and gets into bed.*"
         await message.channel.send(response.format(message))
