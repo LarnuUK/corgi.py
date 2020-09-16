@@ -121,7 +121,7 @@ async def on_message(message):
     for mentions in message.mentions:
         if mentions.id == message.guild.me.id:
             await message.channel.send("Woof?")
-            break;
+            break
 
     if message.content.lower() == ("$github"):
         response = "You can find my master's github here: https://github.com/LarnuUK"
