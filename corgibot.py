@@ -100,7 +100,7 @@ async def on_message(message):
             image = directory + "/images/wednesday.jpg"
             await message.channel.send(file=discord.File(image))
 
-    if message.clean_content.lower() == "time for bed @corgi":
+    if message.clean_content.lower() == "time for bed @corgi" and isThom:
         response = "*Stretches and gets into bed.*"
         await message.channel.send(response.format(message))
         sys.exit()
@@ -351,7 +351,7 @@ async def on_message(message):
 
 
     #Want these commands in the right channel
-    if str(message.channel).lower().startswith("bot"):
+    if str(message.channel).lower().startswith("bot") and message.guild.id == 721685559277256806:
 
         if message.content.lower() == "$rolestats":
             if isCommittee == False and isHeadJudge == False:
