@@ -24,20 +24,19 @@ Adding/Removing a user from your team's role will grant/remove their access righ
 
 -----
 
-**VTC Committee only commands:**
-`$AddCaptain` - Gives a user the Team Captain Role. Must be followed by a mentioned user: for example `$AddCaptain @Larnu#1860` (You cannot make a user who already has a role a Team Captain).
-`$RemoveCaptain` - Removes a user from the Team Captain Role. If they have already created a Team, you will be asked whether you wish to give the Captain Role to another member, or delete the entire team. *Deleting the team cannot be undone.*
-`$AddJudge` - Gives a user the Judge Role. Must be followed by a mentioned user (You cannot make a user who already has a role a Judge).
-`$AddHeadJudge` - Gives a user the Head Judge and Judge Roles. Must be followed by a mentioned user (You cannot make a user who already had a role a Judge).
-`$RemoveJudge` - Removes a user from the (Head) Judge Role(s).
-`$AddStreamer` - Gives a user the Streamer Roler. Must be followed by a mentioned user (You cannot make a user who already have a role a Judge).
-`$RemoveStreamer` - Removes a user from the Stream Role.
+**Server Administrator:**
+`$AddRoleAccess` - Gives a role an access level on the bot. Must be followed by a valid role/mentioned role: for example `$AddRoleAccess Team Captain`.
+`$RemoveRoleAccess` - Removes access levels on the bot for a role. Must be followed by a valid role/mentioned role: for example `$RemoveRoleAccess Team Captain`.
+`$CheckRoleAccess` - Confirms the access level on the bot for a role. Must be followed by a valid role/mentioned role: for example `$CheckRoleAccess Team Captain`.
 `$heret` - Sets a timer for the requested time period. Time must in the format `hh:mm`. Must be followed by a message. For example `$heret 01:30 Dice down!`. On expiry the @here role will be pinged.
-`$RoleStats` - Sends details of the User Role Counts to the Log channel.
 
-**God Commands** *(Can only be used by the Server Owner/Administrator)* **:** 
+-----
+
+**Server Owner Only Commands** *(Can only be used by the Server Owner)* **:** 
+`$ResetTeams` - Purges all current teams, along with their Categories and Channels, removes all users from the Team Captain Role and then Opens the Server. *This action cannot be undone. It will ask you to confirm the action before it is completed.*
+
+**VTC Server Only Commands** *(Can only be used by the Server Owner on the VTC Server)* **:** 
 `$LimitVCs` - Limits the maximum user who can connect to a game VC to 4.
 `$UnlimitVCs` - Removes to limit to the maximum user who can connect to a game VC.
 `$OpenServer` - Allows everyone to access the table text and voice channels
 `$CloseServer` - Removes everyone to access the table text and voice channels
-`$ResetTeams` - Purges all current teams, along with their Categories and Channels, removes all users from the Team Captain Role and then Opens the Server. *This action cannot be undone. It will ask you to confirm the action before it is completed.*
