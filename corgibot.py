@@ -436,7 +436,7 @@ async def on_message(message):
         return
 
     if message.content.lower() == "$help":
-        response = "Please visit the following link for help on my available commands: <http://fishcord.larnu.uk>"
+        response = "Please visit the following link for help on my available commands: <https://fishcord.larnu.uk/corgi-help/>"
         await message.channel.send(response.format(message))
         return
 
