@@ -1,4 +1,5 @@
 **All User commands:**
+`$Help` - Provides a link to this page.
 `$Roll` - rolls a D6.
 `$Roll {n}d{s}` - rolls a `n` dice with `s` sides. For example `$roll 2d6` or `$roll 1d3`.
 `$Flip` - Flips a coin.
@@ -6,6 +7,7 @@
 `${timezone}` - Converts a time to designated Timezone. For example `$CEST 09:00 PDT` will convert the 09:00 CEST to Pacific Daylight Time, `$NZST 12:00 ACDT` will conver 12:00 NZST to ACDT. Times must be in the format `hh:mm`. 
 `$GitHub` - Provides a link to Thom's github.
 `$Timer` - Sets a timer for the requested time period. Time must in the format `hh:mm`. For example `$Timer 03:00` will set a timer for 3 hours. Can optionally be followed by a message. On expiry the user who created it will receive a ping.
+`$GermanPairing` - Initiates a three player team pairing process against a mentioned user using the German Pairing Method. For example `$GermanPairing @Ryan`. You will first be asked if won the roll off, so please ensure you roll off for who picks the table first. Can only be used in table channels.
 
 The following commands can only be used in #bot-commands (except `$heret`):
 
@@ -24,7 +26,7 @@ Adding/Removing a user from your team's role will grant/remove their access righ
 
 -----
 
-**Server Administrator:**
+**Server Administrator Commands:**
 `$AddRoleAccess` - Gives a role an access level on the bot. Must be followed by a valid role/mentioned role: for example `$AddRoleAccess Team Captain`.
 `$RemoveRoleAccess` - Removes access levels on the bot for a role. Must be followed by a valid role/mentioned role: for example `$RemoveRoleAccess Team Captain`.
 `$CheckRoleAccess` - Confirms the access level on the bot for a role. Must be followed by a valid role/mentioned role: for example `$CheckRoleAccess Team Captain`.
