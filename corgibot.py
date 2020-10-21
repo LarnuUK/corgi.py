@@ -435,6 +435,11 @@ async def on_message(message):
         sys.exit()
         return
 
+    if message.content.lower() == "$help"
+        response = "Please visit the following link for help on my available commands: http://fishcord.larnu.uk"
+        await message.channel.send(response.format(message))
+        return
+
     if message.content.lower() == "how i throw":
         rules = throwrules()
         for rule in rules:
