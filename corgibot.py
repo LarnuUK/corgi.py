@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-import discord, discord.utils, random, os, re, json, sys, time, secrets
+import discord, discord.utils, random, os, re, json, sys, time, secrets, pyodbc
 from os import path
 from datetime import datetime, timedelta
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
+
 from rulewordings import throwrules, slamrules
 
 directory = os.path.dirname(os.path.realpath(__file__))
@@ -12,6 +13,20 @@ directory = os.path.dirname(os.path.realpath(__file__))
 load_dotenv()
 key = os.getenv('DISCORD_KEY')
 status = os.getenv('DISCORD_STATUS')
+
+SQLServer = os.getenv('SQL_SERVER')
+SQLDatabase = os.getenv('SQL_DATABASE')
+SQLLogin = os.getenv('SQL_LOGIN')
+SQLPassword = os.getenv('SQL_PASSWORD')
+
+SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer+ ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
+
+sqlConn = pyodbc.connect(SQLConnString)
+
+#cursor = sqlConn.cursor()         
+#cursor.execute('SELECT * FROM sys.databases')
+#for row in cursor:
+#    print(row)
 
 #Bad way to do it, I know.
 colours = ["default","teal","dark teal","green","dark green","blue","dark blue","purple","dark purple","magenta","dark magenta","gold","dark gold","orange","dark orange","red","dark red","lighter grey", "dark grey", "light grey", "darker grey", "blurple", "greyple"]
@@ -29,6 +44,9 @@ timezones = {"PST":{"Name":"Pacific Standard Time", "Offset":-8, "Hours":-8, "Mi
              "ACST":{"Name":"Australian Central Standard Time", "Offset":9.5, "Hours":9, "Minutes":30},"ACDT":{"Name":"Australian Central Daylight Saving Time", "Offset":10.5, "Hours":10, "Minutes":30},
              "AEST":{"Name":"Australian Eastern Standard Time", "Offset":10, "Hours":10, "Minutes":0},"AEDT":{"Name":"Australian Eastern Daylight Saving Time", "Offset":11, "Hours":11, "Minutes":0},
              "NZST":{"Name":"New Zealand Standard Time", "Offset":12, "Hours":12, "Minutes":0},"NZDT":{"Name":"New Zealand Daylight Time", "Offset":13, "Hours":13, "Minutes":0}}
+
+digitemojis = {1:"1️⃣",2:"2️⃣",3:"3️⃣",4:"4️⃣",5:"5️⃣",6:"6️⃣",7:"7️⃣",8:"8️⃣",9:"9️⃣",10:"🔟"}
+emojidigits = {"1️⃣":1,"2️⃣":2,"3️⃣":3,"4️⃣":4,"5️⃣":5,"6️⃣":6,"7️⃣":7,"8️⃣":8,"9️⃣":9,"🔟":10}
              
 
 
@@ -45,6 +63,311 @@ def validatetz(tz):
     except:
         return False
 
+def isowner(guild,user):
+    if guild.owner == user:
+        return True
+    else:
+        return False
+
+def isadmin(guild,user):
+    userRoles = user.roles
+    roleParam = ""
+    for role in userRoles:
+        roleParam = "," + str(role.id)
+    cursor = sqlConn.cursor()
+    roleParam = roleParam[2:]
+    cursor.execute('EXEC corgi.GetUserAccess ?, ?;',guild.id,roleParam)
+    for row in cursor:
+        if row[1] == "Server Administrator":
+            cursor.close()
+            return True
+    cursor.close()
+    return False
+
+def isheadjudge(guild,user):
+    userRoles = user.roles
+    roleParam = ""
+    for role in userRoles:
+        roleParam = "," + str(role.id)
+    cursor = sqlConn.cursor()
+    roleParam = roleParam[2:]
+    cursor.execute('EXEC corgi.GetUserAccess ?, ?;',guild.id,roleParam)
+    for row in cursor:
+        if row[1] == "Server Administrator":
+            cursor.close()
+            return True
+    cursor.close()
+    return False
+def isjudge(guild,user):
+    userRoles = user.roles
+    roleParam = ""
+    for role in userRoles:
+        roleParam = "," + str(role.id)
+    cursor = sqlConn.cursor()
+    roleParam = roleParam[2:]
+    cursor.execute('EXEC corgi.GetUserAccess ?, ?;',guild.id,roleParam)
+    for row in cursor:
+        if row[1] == "Judge" or row[1] == "Head Judge":
+            cursor.close()
+            return True
+    cursor.close()
+    return False
+
+def iscaptain(guild,user):
+    userRoles = user.roles
+    roleParam = ""
+    for role in userRoles:
+        roleParam = "," + str(role.id)
+    cursor = sqlConn.cursor()
+    roleParam = roleParam[2:]
+    cursor.execute('EXEC corgi.GetUserAccess ?, ?;',guild.id,roleParam)
+    for row in cursor:
+        if row[1] == "Team Captain":
+            cursor.close()
+            return True
+    cursor.close()
+    return False
+
+
+async def germanpairing(message):
+    #define checks
+    def winnerResponse(r,u):
+        return r.message.id == winner.id and u.id == message.author.id and r.emoji in ("✅","❎")
+    def tableResponse(r,u):
+        return r.message.id == table.id and u.id == winningPlayer.id and r.emoji in ("1️⃣","3️⃣")
+    def winnerDm(m):
+        return m.author.id == winningPlayer.id and m.channel.type == discord.ChannelType.private
+    def loserDm(m):
+        return m.author.id == losingPlayer.id and m.channel.type == discord.ChannelType.private
+
+    #What emojis we got?
+    greenTick = "✅"
+    greenCross = "❎"
+    oneDigit = "1️⃣"
+    threeDigit = "3️⃣"
+
+    #Who won the roll?
+    response = "Did you win the dice roll, " + message.author.display_name + "?"
+    winner = await message.channel.send(response.format(message))
+    await winner.add_reaction(greenTick)
+    await winner.add_reaction(greenCross)
+    #Get that reaction
+    try:
+        reply = await client.wait_for('reaction_add',check=winnerResponse,timeout=10)
+    except:
+        response = "No response received. Pairing cancelled. If you have not yet rolled off, each use the `$roll` command."
+        await message.channel.send(response.format(message))
+        return
+    
+    #Set winner/loser based on reaction
+    if reply[0].emoji == greenCross:
+        response = "You lost the dice roll, " + message.mentions[0].display_name +" gets to choose the first table."
+        winningPlayer = message.mentions[0]
+        losingPlayer = message.author
+    else:
+        response = "You won the dice roll, you get to choose the first table."
+        winningPlayer = message.author
+        losingPlayer = message.mentions[0]
+    await message.channel.send(response.format(message))
+
+    #What table do you want, winner?
+    response = winningPlayer.display_name + " what table would you like to place your first player card on?"
+    table = await message.channel.send(response.format(message))
+    await table.add_reaction(oneDigit)
+    await table.add_reaction(threeDigit)
+    #Get that reaction
+    try:
+        reply = await client.wait_for('reaction_add',check=tableResponse,timeout=180)
+    except:
+        response = "No response received. Pairing cancelled."
+        await message.channel.send(response.format(message))
+        return
+    #Set table order for selection
+    if reply[0].emoji == oneDigit:
+        firstTable = oneDigit
+        secondTable = threeDigit
+    else:
+        firstTable = threeDigit
+        secondTable = oneDigit
+    
+    #Get Winning Player First Card
+    response = winningPlayer.display_name + " has chosen to place their first card on table " + firstTable + ". Please reply to the DM to confirm the player, and casters, that will you will be placing on this table."
+    await message.channel.send(response.format(message))
+    dm = "Please respond with the Player Name, and their casters, that you would like to play on table " + firstTable + ". For example: Thom: Lucant and Aurora2"
+    await winningPlayer.send(dm.format(message))
+    try:
+        winnerFirstPlayer = await client.wait_for('message',check=winnerDm,timeout=600)
+    except:
+        response = "No response received to DM. Pairing cancelled."
+        await message.channel.send(response.format(message))
+        return
+    response = winningPlayer.display_name + " has chosen their first card. " + losingPlayer.display_name + " please reply to the DM to confirm the player, and casters, that will you will be placing on table " + secondTable + "."
+    await message.channel.send(response.format(message))
+    #Get Losing Player First Card
+    dm = "Please respond with the Player Name, and their casters, that you would like to play on table " + secondTable + ". For example: Thom, Lucant and Aurora2"
+    await losingPlayer.send(dm.format(message))
+    try:
+        loserFirstPlayer = await client.wait_for('message',check=loserDm,timeout=600)
+    except:
+        response = "No response received to DM. Pairing cancelled."
+        await message.channel.send(response.format(message))
+        return
+    response = winningPlayer.display_name + " has chosen to play the following card on table " + firstTable + ": " + winnerFirstPlayer.content + "\n" + losingPlayer.display_name + " has chosen to play the following card on table " + secondTable + ": " + loserFirstPlayer.content
+    await message.channel.send(response.format(message))
+    response = winningPlayer.display_name + " please respond to the DM to confirm what card will be played on table " + secondTable + "."
+    await message.channel.send(response.format(message))
+
+    #Get Winning Player Second Card
+    dm = "Please respond with the Player Name, and their casters, that you would like to play on table " + secondTable + ". This will be against the following card: " + loserFirstPlayer.content + ". For example: Ryan, Harbinger and Feora4"
+    await winningPlayer.send(dm.format(message))
+    try:
+        winnerSecondPlayer = await client.wait_for('message',check=winnerDm,timeout=600)
+    except:
+        response = "No response received to DM. Pairing cancelled."
+        await message.channel.send(response.format(message))
+        return
+    response = winningPlayer.display_name + " has chosen their second card. " + losingPlayer.display_name + " please reply to the DM to confirm the player, and casters, that will you will be placing on table " + firstTable + "."
+    await message.channel.send(response.format(message))
+
+    #Get Losing Player Second Card
+    dm = "Please respond with the Player Name, and their casters, that you would like to play on table " + firstTable + ". This will be against the following card: " + winnerFirstPlayer.content + ".  For example: Ryan, Harbinger and Feora4"
+    await losingPlayer.send(dm.format(message))
+    try:
+        loserSecondPlayer = await client.wait_for('message',check=loserDm,timeout=600)
+    except:
+        response = "No response received to DM. Pairing cancelled."
+        await message.channel.send(response.format(message))
+        return
+    #We did it!!!
+    opponents = "All player cards have been chosen!\n"
+    #Tell people who they are playing
+    if firstTable == oneDigit:
+        opponents = opponents + "1️⃣: " + winnerFirstPlayer.content + " **VS** " + loserSecondPlayer.content + "\n2️⃣: Players that were not selected.\n3️⃣: " + winnerSecondPlayer.content + " **VS** " + loserFirstPlayer.content
+    else:
+        opponents = opponents + "1️⃣: " + winnerSecondPlayer.content + " **VS** " + loserFirstPlayer.content + "\n2️⃣: Players that were not selected.\n3️⃣: " + winnerFirstPlayer.content + " **VS** " + loserSecondPlayer.content
+    await message.channel.send(opponents.format(message))
+    return
+
+async def addaccess(message,serverRoles):
+    #Check permissions
+    if isowner(message.guild,message.author) or isadmin(message.guild,message.author):
+        #Open a connection
+        cursor = sqlConn.cursor()
+        #Get details of the role
+        roleid = None
+        if len(message.role_mentions) == 1:
+            rolename = message.role_mentions[0].name
+            roleid = message.role_mentions[0].id
+        else:
+            rolename = message.content[15:]
+            for role in serverRoles:
+                if role.name.lower() == rolename.lower():
+                    roleid = role.id
+                    rolename = role.name
+                    break
+        #There is no role
+        if roleid is None:
+            response = "Role not found, access level has not been changed."
+            await message.channel.send(response.format(message))
+        else:
+            #Get role levels
+            cursor.execute('EXEC corgi.GetAccessLevels;')
+            r = 1
+            response = "What access level would you like to the the role?"
+            levels = []
+            accesses = []
+            for row in cursor:
+                response = response + "\n" + digitemojis[r] + ": " + row[1]
+                levels.append(row[0])
+                accesses.append(row[1])
+                r = r + 1
+            cursor.close()
+            rows = r - 1
+            #prompt user and add reactions
+            access = await message.channel.send(response.format(message))
+            r = 1
+            while r <= rows:
+                await access.add_reaction(digitemojis[r])
+                r = r + 1
+            def accessResponse(r,u):
+                return r.message.id == access.id and u.id == message.author.id and emojidigits[r.emoji] <= rows
+            try:
+                reply = await client.wait_for('reaction_add',check=accessResponse,timeout=10)
+            except:
+                #Got bored waiting
+                response = "No response received. Access amendment cancelled."
+                await message.channel.send(response.format(message))
+                return
+            #Add the access
+            response = "Adding access level " + accesses[emojidigits[reply[0].emoji]-1] + " to role " + rolename + "."
+            await message.channel.send(response.format(message))
+            cursor.execute('EXEC corgi.AddRoleAccess ?, ?, ?;',message.guild.id,roleid,levels[emojidigits[reply[0].emoji]-1])
+            sqlConn.commit()
+            cursor.close()
+    return
+
+async def removeaccess(message):
+    #Check permissions
+    if isowner(message.guild,message.author) or isadmin(message.guild,message.author):
+        #Get details of the role
+        delrole = None
+        if len(message.role_mentions) == 1:
+            delrole = message.role_mentions[0]
+        else:
+            rolename = message.content[18:]
+            serverRoles = message.guild.roles
+            for role in serverRoles:
+                if role.name.lower() == rolename.lower():
+                    delrole = role
+                    break
+        ##There is no role
+        if delrole is None:
+            response = "Role not found, access level has not been changed."
+            await message.channel.send(response.format(message))
+        else:
+            response = "Permissions related to the role " + delrole.name + " have been removed."
+            await message.channel.send(response.format(message))
+            await removeaccesslevel(message.guild,delrole)
+    return
+
+async def removeaccesslevel(guild,role):
+    cursor = sqlConn.cursor()
+    cursor.execute('EXEC corgi.RemoveRoleAccess ?, ?;',guild.id,role.id)
+    sqlConn.commit()
+    cursor.close()
+
+
+async def checkaccess(message):
+    if isowner(message.guild,message.author) or isadmin(message.guild,message.author):
+        #Get details of the role
+        checkrole = None
+        if len(message.role_mentions) == 1:
+            checkrole = message.role_mentions[0]
+        else:
+            rolename = message.content[17:]
+            serverRoles = message.guild.roles
+            for role in serverRoles:
+                if role.name.lower() == rolename.lower():
+                    checkrole = role
+                    break
+        ##There is no role
+        if checkrole is None:
+            response = "Role not found."
+            await message.channel.send(response.format(message))
+        else:
+            cursor = sqlConn.cursor()
+            cursor.execute('EXEC corgi.GetRoleAccess ?, ?;',message.guild.id,checkrole.id)
+            response = None
+            for row in cursor:
+                response = "The role " + checkrole.name + " currently has the access level " + row[1] + "."
+            cursor.close()
+            if response is None:
+                response = "The role " + checkrole.name + " currently has no access level."
+            await message.channel.send(response.format(message))
+    return
+
+
+
 @client.event
 async def on_ready():
     print('Logged on as {0}!'.format(client.user))
@@ -57,6 +380,11 @@ async def on_message(message):
         return
 
     print('Message from {0.author}: {0.content}'.format(message))
+
+    if message.channel.type == discord.ChannelType.private:
+        return
+
+    serverRoles = message.guild.roles
 
     roles = message.author.roles
     isCommittee = False
@@ -77,16 +405,17 @@ async def on_message(message):
             isCaptain = True
 
     #random sticks     
-    rng = random.randint(1,100)
+    rng = random.randint(1,500)
     #stick = discord.utils.get(message.guild.emojis, name='corgistick') 
     stick = client.get_emoji(735827082151723029)
     #lurk = client.get_emoji(736190606254145548)
-    if rng == 50:        
+    #print("Random Number was: " + str(rng))
+    if rng % 50 == 0:        
         if stick:
             await message.add_reaction(stick)
     
     if rng == 100:        
-        image = directory + "/Images/corgilurk.gif"
+        image = directory + "/images/corgilurk.gif"
         await message.channel.send(file=discord.File(image))
 
     if "corgistick" in message.content:
@@ -270,6 +599,7 @@ async def on_message(message):
             start = datetime.now()
             end = start + timedelta(seconds=duration)
             i = 0
+            import time
             while datetime.now() < end:
                 time.sleep(0.5)
                 i = i+1
@@ -294,7 +624,7 @@ async def on_message(message):
         return
 
     if message.content.lower() == "$heret":
-        response = "The $heret command must be followed by a time period and a reason. For example: `!here 03:00 dice down` will set a timer for 3 hours the reason *\"dice down\"*."
+        response = "The $heret command must be followed by a time period and a reason. For example: `$heret 03:00 dice down` will set a timer for 3 hours the reason *\"dice down\"*."
         await message.channel.send(response.format(message))
         return
 
@@ -307,52 +637,80 @@ async def on_message(message):
         if reason == "":
             await message.channel.send("Here timers must have a reason.")
             return
-        roles =  message.author.roles
-        if isJudge == False and isCommittee == False:
-            await message.channel.send("You must be a Judge or Committee Member to use Here Timers.")
-        elif re.match("[0-9][0-9]:[0-5][0-9]",timer):
-            response = "Setting timer for " + str(int(hours)) + " hour(s) and " + str(int(minutes)) + " minute(s). Let the count down begin!"
-            await message.channel.send(response.format(message))
+        if isowner(message.guild,message.author) or isadmin(message.guild,message.author) or isheadjudge(message.guild,message.author): 
             
-            duration = int(seconds) + (int(minutes) * 60) + (int(hours) * 60 *60)
-            now = datetime.utcnow()
-            embed = discord.Embed(title="Here Timer", description=reason, color=0x4444dd)
-            embed.add_field(name="Duration", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
-            embed.add_field(name="Remaining", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
-            embed.set_footer(text="Updated at: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
-            timermsg = await message.channel.send(embed=embed)
-            
-            #Start counting down
-            start = datetime.now()
-            end = start + timedelta(seconds=duration)
-            i = 0
-            while datetime.now() < end:
-                i = i+1
-                time.sleep(0.5)
-                remaining = int((end - datetime.now()).total_seconds())
-                hours = str(int(remaining / 3600))
-                minutes = str(int((remaining % 3600)/60))
-                seconds = str(remaining % 60)
-                if (remaining >= 600 and i == 30) or (remaining >= 30 and remaining < 600 and i >= 10) or (remaining < 30 and i >= 5) or remaining <= 5:
-                    now = datetime.utcnow()
-                    embed.set_field_at(1,name="Remaining", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
-                    embed.set_footer(text="Updated at: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
-                    await timermsg.edit(embed=embed)
-                    i = 0
-            
-            #timer complete!
-            embed.set_field_at(1,name="Remaining", value="`00:00:00` ", inline=True) 
-            await timermsg.edit(embed=embed)
-            response = "".join(["@here , the timer has finished! ", reason]).format(message)
-            await message.channel.send(response)
+            if re.match("[0-9][0-9]:[0-5][0-9]",timer):
+                response = "Setting timer for " + str(int(hours)) + " hour(s) and " + str(int(minutes)) + " minute(s). Let the count down begin!"
+                await message.channel.send(response.format(message))
+                
+                duration = int(seconds) + (int(minutes) * 60) + (int(hours) * 60 *60)
+                now = datetime.utcnow()
+                embed = discord.Embed(title="Here Timer", description=reason, color=0x4444dd)
+                embed.add_field(name="Duration", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
+                embed.add_field(name="Remaining", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
+                embed.set_footer(text="Updated at: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                timermsg = await message.channel.send(embed=embed)
+                
+                #Start counting down
+                start = datetime.now()
+                end = start + timedelta(seconds=duration)
+                i = 0
+                import time
+                while datetime.now() < end:
+                    i = i+1
+                    time.sleep(0.5)
+                    remaining = int((end - datetime.now()).total_seconds())
+                    hours = str(int(remaining / 3600))
+                    minutes = str(int((remaining % 3600)/60))
+                    seconds = str(remaining % 60)
+                    if (remaining >= 600 and i == 30) or (remaining >= 30 and remaining < 600 and i >= 10) or (remaining < 30 and i >= 5) or remaining <= 5:
+                        now = datetime.utcnow()
+                        embed.set_field_at(1,name="Remaining", value="`" + '%02d' % int(hours) + ":" + '%02d' % int(minutes) + ":" + '%02d' % int(seconds) + "` ", inline=True) 
+                        embed.set_footer(text="Updated at: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                        await timermsg.edit(embed=embed)
+                        i = 0
+                #timer complete!
+                embed.set_field_at(1,name="Remaining", value="`00:00:00`", inline=True) 
+                await timermsg.edit(embed=embed)
+                response = "".join(["@here , the timer has finished! ", reason]).format(message)
+                await message.channel.send(response)
+            else:
+                await message.channel.send("That isn't a valid time!")
         else:
-            await message.channel.send("That isn't a valid time!")
+            await message.channel.send("You must be a Judge to use Here Timers.")
         return
 
+    if message.content.lower().startswith("$germanpairing"):
+        if str(message.channel).lower().startswith("table"):
+            if len(message.mentions) == 1:
+                await germanpairing(message)
+            else:
+                response = "You must mention your opponent to begin a pairing process."
+                await message.channel.send(response.format(message))
+        else:
+            response = "You can only use this command in a table channel."
+            await message.channel.send(response.format(message))
+        return
 
     #Want these commands in the right channel
     if str(message.channel).lower().startswith("bot"):
 
+        if message.content.lower().startswith("$addroleaccess"):
+            await addaccess(message,serverRoles)
+            return
+        
+        if message.content.lower().startswith("$removeroleaccess"):
+            await removeaccess(message)
+            return
+        
+        if message.content.lower().startswith("$checkroleaccess"):
+            await checkaccess(message)
+            return
+
+        #The old commands start below here:
+        if not(message.guild.id == 721685559277256806):
+            return
+        
         if message.content.lower() == "$rolestats":
             if isCommittee == False and isHeadJudge == False:
                 await message.channel.send("Only Committee members can use that command.")
@@ -432,7 +790,12 @@ Thanks for joining the tournament, and good luck!"""
                 await message.channel.send(response.format(message))
                 def sameuserchannel(m):
                     return m.channel == message.channel and m.author == message.author
-                reply = await client.wait_for('message',check=sameuserchannel)
+                try:
+                    reply = await client.wait_for('message',check=sameuserchannel,timeout=60)
+                except:
+                    response = "No response received. Removal cancelled"
+                    await message.channel.send(response.format(message))
+                    return
                 if reply.content == "DELETE " + teamrole.name.upper():
                     response = "Deleting Team " + teamrole.name + "."
                     await message.channel.send(response.format(message))
@@ -1008,6 +1371,9 @@ Thanks for joining the tournament, and good luck!"""
                 embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
                 await logchannel.send(embed=embed)
             return
-                            
+
+@client.event
+async def on_guild_role_delete(role):
+    await removeaccesslevel(role.guild,role)
 
 client.run(key)
