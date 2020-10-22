@@ -10,7 +10,7 @@ from rulewordings import throwrules, slamrules
 from pairings import german
 from access import isowner, isadmin, isheadjudge, isjudge, iscaptain, addaccess, removeaccess, removeaccesslevel, checkaccess
 from teams import addcaptain
-from events import addevent, events
+from events import addevent, events, adddetail, eventdetails, editevent, deleteevent
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -384,6 +384,14 @@ async def on_message(message):
         await events(message)
         return
 
+    if message.content.lower().startswith("$eventdetails"):
+        if not(message.content[14:].isdecimal()):
+            response = "Invalid event ID."
+            await message.channel.send(response.format(message))
+            return
+        await eventdetails(message,message.content[14:])
+        return
+
     #Want these commands in the right channel
     if str(message.channel).lower().startswith("bot"):
 
@@ -408,9 +416,21 @@ async def on_message(message):
             await addcaptain(message)
             return
 
+        if message.content.lower().startswith("$addeventdetail"):
+            await adddetail(client,message)
+            return
+
         if message.content.lower().startswith("$addevent"):
             await addevent(client,message)
             return
+
+        if message.content.lower().startswith("$editevent"):
+            await editevent(client,message)
+            return        
+
+        if message.content.lower().startswith("$deleteevent"):
+            await deleteevent(client,message)
+            return        
 
 @client.event
 async def on_guild_role_delete(role):
