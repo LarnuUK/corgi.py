@@ -389,7 +389,7 @@ async def on_message(message):
         return
 
     #Want these commands in the right channel
-    if str(message.channel).lower().startswith("bot"):
+    if str(message.channel).lower().startswith("bot") and message.guild.id == 721685559277256806:
 
         if message.content.lower().startswith("$addroleaccess"):
             await access.addaccess(client,message)
