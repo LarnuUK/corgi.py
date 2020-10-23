@@ -34,11 +34,15 @@ def geteventdetail (guild,eventid):
     cursor.execute('EXEC corgi.GetEventDetail ?, ?;',guild.id,eventid)
     return cursor
 
+def getdetail (guild,detailid):
+    cursor = sqlConn.cursor()
+    cursor.execute('EXEC corgi.GetDetail ?, ?;',guild.id,detailid)
+    return cursor
 
 async def addevent(client,message):
     def isdate(m):
         return m.author.id == message.author.id and m.channel.id == message.channel.id and re.match("[2][0-1][0-9][0-9]-[0-1][0-9]-[0-3][0-9]",m.content) and validatedate(m.content)
-    def channelsResponse(r,u):
+    def booleanResponse(r,u):
         return r.message.id == respond.id and u.id == message.author.id and r.emoji in ("✅","❎")
     if isowner(message.guild,message.author) or isadmin(message.guild,message.author) or isheadjudge(message.guild,message.author):
         if message.content[10:] == "":
@@ -74,7 +78,7 @@ async def addevent(client,message):
         #Get that reaction
         reply = None
         try:
-            reply = await client.wait_for('reaction_add',check=channelsResponse,timeout=10)
+            reply = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
         except:
             response = "No response received. Assumed solos event."
             await message.channel.send(response.format(message))
@@ -91,7 +95,7 @@ async def addevent(client,message):
             #Get that reaction
             reply = None
             try:
-                reply = await client.wait_for('reaction_add',check=channelsResponse,timeout=10)
+                reply = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
                 response = "No response received. Assumed channels are not required."
                 await message.channel.send(response.format(message))
@@ -228,7 +232,7 @@ async def editevent(client,message):
         return m.author.id == message.author.id and m.channel.id == message.channel.id
     def isdate(m):
         return m.author.id == message.author.id and m.channel.id == message.channel.id and re.match("[2][0-1][0-9][0-9]-[0-1][0-9]-[0-3][0-9]",m.content) and validatedate(m.content)
-    def channelsResponse(r,u):
+    def booleanResponse(r,u):
         return r.message.id == respond.id and u.id == message.author.id and r.emoji in ("✅","❎")
     if isowner(message.guild,message.author) or isadmin(message.guild,message.author) or isheadjudge(message.guild,message.author):
         if message.content[11:] == "":
@@ -281,7 +285,7 @@ async def editevent(client,message):
                     response = "No response received. Editting cancelled."
                     await message.channel.send(response.format(message))
                     return
-                eventname = reply
+                eventname = reply.content
             elif replyoption == 2:
                 response = "What is the new start date of the event? (Format required is `yyyy-MM-dd`)"
                 await message.channel.send(response.format(message))
@@ -318,7 +322,7 @@ async def editevent(client,message):
                 #Get that reaction
                 reply = None
                 try:
-                    reply = await client.wait_for('reaction_add',check=channelsResponse,timeout=10)
+                    reply = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
                 except:
                     response = "No response received. Assumed solos event."
                     await message.channel.send(response.format(message))
@@ -335,7 +339,7 @@ async def editevent(client,message):
                     #Get that reaction
                     reply = None
                     try:
-                        reply = await client.wait_for('reaction_add',check=channelsResponse,timeout=10)
+                        reply = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
                     except:
                         response = "No response received. Assumed channels are not required."
                         await message.channel.send(response.format(message))
@@ -351,7 +355,7 @@ async def editevent(client,message):
                 #Get that reaction
                 reply = None
                 try:
-                    reply = await client.wait_for('reaction_add',check=channelsResponse,timeout=10)
+                    reply = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
                 except:
                     response = "No response received. Assumed channels are not required."
                     await message.channel.send(response.format(message))
@@ -378,11 +382,11 @@ async def editevent(client,message):
     return
 
 async def deleteevent(client,message):
-    def channelsResponse(r,u):
+    def booleanResponse(r,u):
         return r.message.id == respond.id and u.id == message.author.id and r.emoji in ("✅","❎")
     if isowner(message.guild,message.author) or isadmin(message.guild,message.author) or isheadjudge(message.guild,message.author):
-        if message.content[12:] == "":
-            response = "Requires Event ID to edit."
+        if message.content[13:] == "":
+            response = "Requires Event ID to delete."
             await message.channel.send(response.format(message))
             return
         elif not(message.content[13:].isdecimal()):
@@ -406,7 +410,7 @@ async def deleteevent(client,message):
             #Get that reaction
             reply = None
             try:
-                reply = await client.wait_for('reaction_add',check=channelsResponse,timeout=10)
+                reply = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
                 response = "No response received. Deletion cancelled."
                 await message.channel.send(response.format(message))
@@ -433,7 +437,66 @@ async def deleteevent(client,message):
                 logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
                 await logchannel.send(embed=embed)
     return
-            
+
+async def deletedetail(client,message):
+    def booleanResponse(r,u):
+        return r.message.id == respond.id and u.id == message.author.id and r.emoji in ("✅","❎")
+    if isowner(message.guild,message.author) or isadmin(message.guild,message.author) or isheadjudge(message.guild,message.author):
+        if message.content[14:] == "":
+            response = "Requires Detail ID to edit."
+            await message.channel.send(response.format(message))
+            return
+        elif not(message.content[14:].isdecimal()):
+            response = "Invalid detail ID."
+            await message.channel.send(response.format(message))
+            return
+        else:
+            detailid = message.content[14:]
+            detail = getdetail(message.guild,detailid)
+            if detail is None:
+                response = "Invalid detail ID; detail does not exist."
+                await message.channel.send(response.format(message))
+                return
+            for row in detail:
+                eventname = row[1]
+                detailname = row[7]
+            detail.close()
+            response = "Are you sure you want to delete the detail " + detailname + " for the event " + eventname + "?"
+            respond = await message.channel.send(response.format(message))
+            await respond.add_reaction(greenTick)
+            await respond.add_reaction(greenCross)
+            #Get that reaction
+            reply = None
+            try:
+                reply = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
+            except:
+                response = "No response received. Deletion cancelled."
+                await message.channel.send(response.format(message))
+                return
+            if reply is None or reply[0].emoji == greenCross:
+                response = "Deletion cancelled."
+                await message.channel.send(response.format(message))
+                return
+            else:
+                cursor = sqlConn.cursor()
+                cursor.execute('EXEC corgi.DeleteDetail ?, ?;', message.guild.id, detailid)
+                cursor.commit()
+                cursor.close()
+                response = "Detail Deleted."
+                await message.channel.send(response.format(message))
+                #Log details
+                embed = discord.Embed(title="Delete Event Detail", color=discord.Colour.orange())
+                embed.add_field(name="Deleted By", value=message.author.display_name, inline=False)
+                embed.add_field(name="Deleted By ID", value=message.author.id, inline=False)
+                embed.add_field(name="Detail Name", value=detailname, inline=False)
+                embed.add_field(name="Detail ID", value=detailid, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
+                await logchannel.send(embed=embed)
+    return
+
+
 async def events(message):
     embed = discord.Embed(title="Current Events", color=discord.Colour.orange())
     cursor = sqlConn.cursor()

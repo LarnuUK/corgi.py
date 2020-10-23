@@ -7,10 +7,10 @@ from discord.utils import get
 from dotenv import load_dotenv
 
 from rulewordings import throwrules, slamrules
-from pairings import german
-from access import isowner, isadmin, isheadjudge, isjudge, iscaptain, addaccess, removeaccess, removeaccesslevel, checkaccess
-from teams import addcaptain
-from events import addevent, events, adddetail, eventdetails, editevent, deleteevent
+import pairings
+import access
+import teams 
+import events
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -48,10 +48,6 @@ timezones = {"PST":{"Name":"Pacific Standard Time", "Offset":-8, "Hours":-8, "Mi
 
 
 client = discord.Client()
-
-def randomcolour():
-    colour = secrets.token_hex(3)
-    return colour
 
 def validatetz(tz):
     try:
@@ -325,7 +321,7 @@ async def on_message(message):
         if reason == "":
             await message.channel.send("Here timers must have a reason.")
             return
-        if isowner(message.guild,message.author) or isadmin(message.guild,message.author) or isheadjudge(message.guild,message.author): 
+        if access.isowner(message.guild,message.author) or access.isadmin(message.guild,message.author) or access.isheadjudge(message.guild,message.author): 
             
             if re.match("[0-9][0-9]:[0-5][0-9]",timer):
                 response = "Setting timer for " + str(int(hours)) + " hour(s) and " + str(int(minutes)) + " minute(s). Let the count down begin!"
@@ -371,7 +367,7 @@ async def on_message(message):
     if message.content.lower().startswith("$germanpairing"):
         if str(message.channel).lower().startswith("table"):
             if len(message.mentions) == 1:
-                await german(client,message)
+                await pairings.german(client,message)
             else:
                 response = "You must mention your opponent to begin a pairing process."
                 await message.channel.send(response.format(message))
@@ -381,7 +377,7 @@ async def on_message(message):
         return
 
     if message.content.lower() == "$events":
-        await events(message)
+        await events.events(message)
         return
 
     if message.content.lower().startswith("$eventdetails"):
@@ -389,22 +385,22 @@ async def on_message(message):
             response = "Invalid event ID."
             await message.channel.send(response.format(message))
             return
-        await eventdetails(message,message.content[14:])
+        await events.eventdetails(message,message.content[14:])
         return
 
     #Want these commands in the right channel
     if str(message.channel).lower().startswith("bot"):
 
         if message.content.lower().startswith("$addroleaccess"):
-            await addaccess(client,message)
+            await access.addaccess(client,message)
             return
         
         if message.content.lower().startswith("$removeroleaccess"):
-            await removeaccess(message)
+            await access.removeaccess(message)
             return
         
         if message.content.lower().startswith("$checkroleaccess"):
-            await checkaccess(message)
+            await access.checkaccess(message)
             return
 
         if message.content.lower() == "$colours":
@@ -413,27 +409,69 @@ async def on_message(message):
             return
 
         if message.content.lower().startswith("$addcaptain"):
-            await addcaptain(message)
+            await teams.addcaptain(message)
             return
 
         if message.content.lower().startswith("$addeventdetail"):
-            await adddetail(client,message)
+            await events.adddetail(client,message)
             return
 
         if message.content.lower().startswith("$addevent"):
-            await addevent(client,message)
+            await events.addevent(client,message)
             return
 
         if message.content.lower().startswith("$editevent"):
-            await editevent(client,message)
+            await events.editevent(client,message)
             return        
 
         if message.content.lower().startswith("$deleteevent"):
-            await deleteevent(client,message)
+            await events.deleteevent(client,message)
             return        
+
+        if message.content.lower().startswith("$deletedetail"):
+            await events.deletedetail(client,message)
+            return
+
+        if message.content.lower().startswith("$createteam"):
+            await teams.createteam(message)
+            return
+
+        if message.content.lower().startswith("$registerteam"):
+            await teams.registerteam(client,message)
+            return
+
+        if message.content.lower().startswith("$deregisterteam"):
+            await teams.deregisterteam(client,message)
+            return
+
+        if message.content.lower().startswith("$addplayer"):
+            await teams.addplayer(client,message)
+            return
+
+        if message.content.lower().startswith("$removeplayer"):
+            await teams.removeplayer(client,message)
+            return
+
+        if message.content.lower().startswith("$teamcolour"):
+            await teams.changecolour(client,message)
+            return
+
+        if message.content.lower().startswith("$renameteam"):
+            await teams.renameteam(client,message)
+            return
+
+        if message.content.lower() == "$deleteteam":
+            await teams.deleteteam(client,message)
+            return
 
 @client.event
 async def on_guild_role_delete(role):
-    await removeaccesslevel(role.guild,role)
+    await access.removeaccesslevel(role.guild,role)
+    await teams.removeteam(role)
+
+@client.event
+async def on_member_remove(member):
+    await teams.reassigncaptain(member)
+    await teams.clearcaptain(member)
 
 client.run(key)

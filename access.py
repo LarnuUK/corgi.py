@@ -24,9 +24,9 @@ def isadmin(guild,user):
     userRoles = user.roles
     roleParam = ""
     for role in userRoles:
-        roleParam = "," + str(role.id)
+        roleParam = roleParam + "," + str(role.id)
     cursor = sqlConn.cursor()
-    roleParam = roleParam[2:]
+    roleParam = roleParam[1:]
     cursor.execute('EXEC corgi.GetUserAccess ?, ?;',guild.id,roleParam)
     for row in cursor:
         if row[1] == "Server Administrator":
@@ -39,9 +39,9 @@ def isheadjudge(guild,user):
     userRoles = user.roles
     roleParam = ""
     for role in userRoles:
-        roleParam = "," + str(role.id)
+        roleParam = roleParam + "," + str(role.id)
     cursor = sqlConn.cursor()
-    roleParam = roleParam[2:]
+    roleParam = roleParam[1:]
     cursor.execute('EXEC corgi.GetUserAccess ?, ?;',guild.id,roleParam)
     for row in cursor:
         if row[1] == "Server Administrator":
@@ -54,9 +54,9 @@ def isjudge(guild,user):
     userRoles = user.roles
     roleParam = ""
     for role in userRoles:
-        roleParam = "," + str(role.id)
+        roleParam = roleParam + "," + str(role.id)
     cursor = sqlConn.cursor()
-    roleParam = roleParam[2:]
+    roleParam = roleParam[1:]
     cursor.execute('EXEC corgi.GetUserAccess ?, ?;',guild.id,roleParam)
     for row in cursor:
         if row[1] == "Judge" or row[1] == "Head Judge":
@@ -69,9 +69,9 @@ def iscaptain(guild,user):
     userRoles = user.roles
     roleParam = ""
     for role in userRoles:
-        roleParam = "," + str(role.id)
+        roleParam = roleParam + "," + str(role.id)
     cursor = sqlConn.cursor()
-    roleParam = roleParam[2:]
+    roleParam = roleParam[1:]
     cursor.execute('EXEC corgi.GetUserAccess ?, ?;',guild.id,roleParam)
     for row in cursor:
         if row[1] == "Team Captain":
@@ -80,6 +80,13 @@ def iscaptain(guild,user):
     cursor.close()
     return False
 
+def getcaptain(guild):
+    cursor = sqlConn.cursor()
+    cursor.execute('EXEC corgi.GetCaptainRole ?;',guild.id)
+    for row in cursor:
+        captain = row[0]
+    cursor.close()
+    return captain
 
 async def addaccess(client,message):
     #Check permissions
