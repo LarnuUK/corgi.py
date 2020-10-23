@@ -2,12 +2,14 @@ import discord, discord.utils, random, os, re, json, sys, time, secrets, pyodbc
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
+load_dotenv()
 SQLServer = os.getenv('SQL_SERVER')
 SQLDatabase = os.getenv('SQL_DATABASE')
 SQLLogin = os.getenv('SQL_LOGIN')
 SQLPassword = os.getenv('SQL_PASSWORD')
 
-SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer+ ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
+SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer + ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
+
 
 sqlConn = pyodbc.connect(SQLConnString)
 

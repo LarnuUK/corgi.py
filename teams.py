@@ -5,12 +5,13 @@ from dotenv import load_dotenv
 from access import isowner, isadmin, isheadjudge, isjudge, iscaptain, getcaptain
 from events import getevent
 
+load_dotenv()
 SQLServer = os.getenv('SQL_SERVER')
 SQLDatabase = os.getenv('SQL_DATABASE')
 SQLLogin = os.getenv('SQL_LOGIN')
 SQLPassword = os.getenv('SQL_PASSWORD')
 
-SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer+ ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
+SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer + ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
 
 sqlConn = pyodbc.connect(SQLConnString)
 
