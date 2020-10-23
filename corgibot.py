@@ -464,6 +464,18 @@ async def on_message(message):
             await teams.deleteteam(client,message)
             return
 
+        if message.content.lower() == "$leaveteam":
+            await teams.leaveteam(client,message)
+            return
+
+        if message.content.lower().startswith("$assigncaptain"):
+            await teams.assigncaptain(client,message)
+            return
+
+        if message.content.lower().startswith("$removecaptain"):
+            await teams.removecaptain(client,message)
+            return
+
 @client.event
 async def on_guild_role_delete(role):
     await access.removeaccesslevel(role.guild,role)
@@ -471,7 +483,7 @@ async def on_guild_role_delete(role):
 
 @client.event
 async def on_member_remove(member):
-    await teams.reassigncaptain(member)
+    await teams.reassigncaptain(member,None)
     await teams.clearcaptain(member)
 
 client.run(key)

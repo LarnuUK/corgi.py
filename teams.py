@@ -13,7 +13,6 @@ SQLPassword = os.getenv('SQL_PASSWORD')
 SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer+ ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
 
 sqlConn = pyodbc.connect(SQLConnString)
-sqlConn2 = pyodbc.connect(SQLConnString)
 
 colours = ["default","teal","dark teal","green","dark green","blue","dark blue","purple","dark purple","magenta","dark magenta","gold","dark gold","orange","dark orange","red","dark red","lighter grey", "dark grey", "light grey", "darker grey", "blurple", "greyple"]
 colourings = {"default":discord.Colour.default(),"teal":discord.Colour.teal(),"dark teal":discord.Colour.dark_teal(),"green":discord.Colour.green(),"dark green":discord.Colour.dark_green(),"blue":discord.Colour.blue(),"dark blue":discord.Colour.dark_blue(),"purple":discord.Colour.purple(),"dark purple":discord.Colour.dark_purple(),"magenta":discord.Colour.magenta(),"dark magenta":discord.Colour.dark_magenta(),"gold":discord.Colour.gold(),"dark gold":discord.Colour.dark_gold(),"orange":discord.Colour.orange(),"dark orange":discord.Colour.dark_orange(),"red":discord.Colour.red(),"dark red":discord.Colour.dark_red(),"lighter grey":discord.Colour.lighter_grey(),"dark grey":discord.Colour.dark_grey(),"light grey":discord.Colour.light_grey(),"darker grey":discord.Colour.darker_grey(),"blurple":discord.Colour.blurple(),"greyple":discord.Colour.greyple()}
@@ -35,7 +34,12 @@ def getcaptainrole (guild):
     cursor.close()
     return None
 
-def getteams (captain):
+def getteams (player):
+    cursor = sqlConn.cursor()
+    cursor.execute('EXEC corgi.GetTeams ?;',player.id)
+    return cursor
+
+def getcaptainteams (captain):
     cursor = sqlConn.cursor()
     cursor.execute('EXEC corgi.GetCaptainTeams ?;',captain.id)
     return cursor
@@ -68,6 +72,53 @@ async def addcaptain (message):
             await message.channel.send(response.format(message))
     return
 
+async def removecaptain (client,message):
+    def booleanResponse(r,u):
+        return r.message.id == choice.id and u.id == message.author.id and r.emoji in ("✅","❎")
+    if isowner(message.guild,message.author) or isadmin(message.guild,message.author) or isheadjudge(message.guild,message.author):
+        if len(message.mentions) == 1:
+            teamcaptainrole = getcaptainrole(message.guild)
+            if teamcaptainrole is None:
+                response = "A role has not yet been given the Team Captain Access Level. Please give a role Team Captain Access using the `$AddRoleAccess` command."
+                await message.channel.send(response.format(message))
+                return
+            else:
+                response = "Are you sure you want to remove the Captain Role from " + message.mentions[0].display_name + "? Any teams that are a captain of will heave a new captain randomly assigned and teams with no members will be deleted."
+                choice = await message.channel.send(response.format(message))
+                await choice.add_reaction(greenTick)
+                await choice.add_reaction(greenCross)
+                try:
+                    booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
+                except:
+                    response = "No response received. Captaincy not removed."
+                    await message.channel.send(response.format(message))
+                    return                
+                if booleanrespond[0].emoji == greenCross:
+                    response = " Captaincy not removed."
+                    await message.channel.send(response.format(message))
+                    return
+                else:
+                    teamcaptain = discord.utils.get(message.guild.roles, id=teamcaptainrole)
+                    await message.mentions[0].remove_roles(teamcaptain)
+                    response = "{0.mentions[0].display_name} has had the Team Captain Role removed."
+                    await message.channel.send(response.format(message))
+                    #Log details
+                    embed = discord.Embed(title="Remove Team Captain", color=teamcaptain.colour) #description=message.mentions[0].display_name
+                    embed.add_field(name="Removed By", value=message.author.display_name, inline=False)
+                    embed.add_field(name="Removed ID", value=message.author.id, inline=False)
+                    embed.add_field(name="Captain Removed", value=message.mentions[0].display_name, inline=False)
+                    embed.add_field(name="Captain ID", value=message.mentions[0].id, inline=False)
+                    now = datetime.utcnow()
+                    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                    logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
+                    await logchannel.send(embed=embed)
+                    await reassigncaptain(message.mentions[0],1)
+                    await clearcaptain(message.mentions[0])
+
+        else:
+            response = "You need to mention a user to give the Team Captain Role to."
+            await message.channel.send(response.format(message))
+    return
 async def createteam(message):
     if iscaptain(message.guild,message.author):
         if message.content[12:] == "":
@@ -90,7 +141,7 @@ async def createteam(message):
         await captainrole.edit(position=1)
         await message.author.add_roles(newteam)
         cursor = sqlConn.cursor()
-        cursor.execute('EXEC corgi.CreateTeam ?, ?, ?, ?;',newteam.id,newteam.name,message.author.id,message.author.id)
+        cursor.execute('EXEC corgi.CreateTeam ?, ?, ?, ?, ?;', message.guild.id,newteam.id,newteam.name,message.author.id,message.author.id)
         sqlConn.commit()
         cursor.close()
         response = "New team " + newteam.name +" created."
@@ -137,7 +188,7 @@ async def registerteam(client,message):
                 response = "Event is not a team event. You cannot register teams for a team event."
                 await message.channel.send(response.format(message))
                 return
-            teams = getteams(message.author)
+            teams = getcaptainteams(message.author)
             #Now because Python can't count we have to do dumb shit...
             t = 0
             teamids = []
@@ -313,7 +364,7 @@ async def addplayer(client,message):
             await message.channel.send(response.format(message))
             return
         
-        teams = getteams(message.author)
+        teams = getcaptainteams(message.author)
         #Now because Python can't count we have to do dumb shit...
         t = 0
         teamids = []
@@ -397,7 +448,7 @@ async def removeplayer(client,message):
             response = "You must mention the user you want to remove from your Team."
             await message.channel.send(response.format(message))
             return
-        teams = getteams(message.author)
+        teams = getcaptainteams(message.author)
         #Now because Python can't count we have to do dumb shit...
         t = 0
         teamids = []
@@ -486,7 +537,7 @@ async def changecolour(client,message):
         if not re.match("[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]",teamcolour) and colours.count(teamcolour) == 0 and not teamcolour == "random":
             await message.channel.send("Invalid hex or predefined colour.")
             return
-        teams = getteams(message.author)
+        teams = getcaptainteams(message.author)
         #Now because Python can't count we have to do dumb shit...
         t = 0
         teamids = []
@@ -573,7 +624,7 @@ async def renameteam(client,message):
             response = "A team, role or category with that name already exists on the server. Please choose a different name."
             await message.channel.send(response.format(message))
             return
-        teams = getteams(message.author)
+        teams = getcaptainteams(message.author)
         #Now because Python can't count we have to do dumb shit...
         t = 0
         teamids = []
@@ -653,7 +704,7 @@ async def deleteteam(client,message):
     def digitResponse(r,u):
         return r.message.id == choice.id and u.id == message.author.id and emojidigits[r.emoji] <= t
     if iscaptain(message.guild,message.author):
-        teams = getteams(message.author)
+        teams = getcaptainteams(message.author)
         #Now because Python can't count we have to do dumb shit...
         t = 0
         teamids = []
@@ -745,6 +796,199 @@ async def deleteteam(client,message):
         await logchannel.send(embed=embed)
     return
 
+async def leaveteam(client,message):
+    def booleanResponse(r,u):
+        return r.message.id == choice.id and u.id == message.author.id and r.emoji in ("✅","❎")
+    def digitResponse(r,u):
+        return r.message.id == choice.id and u.id == message.author.id and emojidigits[r.emoji] <= t
+    teams = getteams(message.author)
+    #Now because Python can't count we have to do dumb shit...
+    t = 0
+    teamids = []
+    teamnames = []
+    teamcaptains = []
+    response = "What team do you want to leave?"
+    for team in teams:
+        if discord.utils.get(message.guild.roles, id=team[0]):
+            t = t + 1
+            teamids.append(team[0])
+            teamnames.append(team[1])
+            teamcaptains.append(team[2])
+            response = response + "\n" + digitemojis[t] + ": " + team[1]               
+    teams.close()
+    if t == 0:
+        response = "You aren't part of any teams."
+        await message.channel.send(response.format(message))
+        return
+    elif t == 1:
+        response = "Are you sure you want to leave the team " + teamnames[0] + "?"
+        choice = await message.channel.send(response.format(message))
+        await choice.add_reaction(greenTick)
+        await choice.add_reaction(greenCross)
+        try:
+            booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
+        except:
+            response = "No response received. Not left team."
+            await message.channel.send(response.format(message))
+            return                
+        if booleanrespond[0].emoji == greenCross:
+            response = "Not left team."
+            await message.channel.send(response.format(message))
+            return
+        else:
+            teamid = teamids[0]
+            teamname = teamnames[0]
+    else:
+        choice = await message.channel.send(response.format(message))
+        for d in range(0,t):
+            await choice.add_reaction(digitemojis[d+1])                
+        try:
+            digitrespond = await client.wait_for('reaction_add',check=digitResponse,timeout=10)
+        except:
+            response = "No response received. Not left team."
+            await message.channel.send(response.format(message))
+            return
+        teamid = teamids[emojidigits[digitrespond[0].emoji]-1]
+        teamname = teamnames[emojidigits[digitrespond[0].emoji]-1]
+        teamcaptain = teamcaptains[emojidigits[digitrespond[0].emoji]-1]
+        response = "Are you sure you want to leave the team " + teamname + "?"
+        choice = await message.channel.send(response.format(message))
+        await choice.add_reaction(greenTick)
+        await choice.add_reaction(greenCross)
+        try:
+            booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
+        except:
+            response = "No response received. Not left team."
+            await message.channel.send(response.format(message))
+            return                
+        if booleanrespond[0].emoji == greenCross:
+            response = "Not left team."
+            await message.channel.send(response.format(message))
+            return
+    if teamcaptain == message.author.id:
+        response = "You cannot leave a team you are captain of. Please assign another player as the captain using `$AssignCaptain` and you may then leave, or delete the team using `$DeleteTeam`."
+        await message.channel.send(response.format(message))
+        return
+    team = discord.utils.get(message.guild.roles, id=teamid)
+    cursor = sqlConn.cursor()
+    cursor.execute('EXEC corgi.LeaveTeam ?, ?;',message.author.id,team.id)
+    sqlConn.commit()
+    cursor.close()
+    message.author.remove_roles(team)
+    embed = discord.Embed(title="Player Left Team", color=team.colour) 
+    embed.add_field(name="Player Name", value=message.author.display_name, inline=False)
+    embed.add_field(name="Player ID", value=message.author.id, inline=False)
+    embed.add_field(name="Team Name", value=team.name, inline=False)
+    embed.add_field(name="Team ID", value=team.id, inline=False)
+    now = datetime.utcnow()
+    embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+    logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
+    await logchannel.send(embed=embed)
+
+async def assigncaptain(client,message):
+    def booleanResponse(r,u):
+        return r.message.id == choice.id and u.id == message.author.id and r.emoji in ("✅","❎")
+    def digitResponse(r,u):
+        return r.message.id == choice.id and u.id == message.author.id and emojidigits[r.emoji] <= t
+    if iscaptain(message.guild,message.author):
+        if len(message.mentions) == 0:
+            response = "You need to mention the new user who will be given the captaincy of the team."
+            await message.channel.send(response.format(message))
+            return
+        teams = getcaptainteams(message.author)
+        #Now because Python can't count we have to do dumb shit...
+        t = 0
+        teamids = []
+        teamnames = []
+        response = "What team do you want to assign the captain on?"
+        for team in teams:
+            if discord.utils.get(message.guild.roles, id=team[0]):
+                t = t + 1
+                teamids.append(team[0])
+                teamnames.append(team[1])
+                response = response + "\n" + digitemojis[t] + ": " + team[1]                    
+        teams.close()
+        if t == 0:
+            response = "You aren't the captain of any teams."
+            await message.channel.send(response.format(message))
+            return
+        elif t == 1:
+            response = "Are you sure you want to assign the captaincy of the team " + teamnames[0] + " to " + message.mentions[0].display_name + "?"
+            choice = await message.channel.send(response.format(message))
+            await choice.add_reaction(greenTick)
+            await choice.add_reaction(greenCross)
+            try:
+                booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
+            except:
+                response = "No response received. Captain not changed."
+                await message.channel.send(response.format(message))
+                return                
+            if booleanrespond[0].emoji == greenCross:
+                response = "Captain not changed."
+                await message.channel.send(response.format(message))
+                return
+            else:
+                teamid = teamids[0]
+                teamname = teamnames[0]
+        else:
+            choice = await message.channel.send(response.format(message))
+            for d in range(0,t):
+                await choice.add_reaction(digitemojis[d+1])                
+            try:
+                digitrespond = await client.wait_for('reaction_add',check=digitResponse,timeout=10)
+            except:
+                response = "No response received. Captain not changed."
+                await message.channel.send(response.format(message))
+                return
+            teamid = teamids[emojidigits[digitrespond[0].emoji]-1]
+            teamname = teamnames[emojidigits[digitrespond[0].emoji]-1]
+            response = "Are you sure you want to assign the captaincy of the team " + teamname + " to " + message.mentions[0].display_name + "?"
+            choice = await message.channel.send(response.format(message))
+            await choice.add_reaction(greenTick)
+            await choice.add_reaction(greenCross)
+            try:
+                booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
+            except:
+                response = "No response received. Captain not changed."
+                await message.channel.send(response.format(message))
+                return                
+            if booleanrespond[0].emoji == greenCross:
+                response = "Captain not changed."
+                await message.channel.send(response.format(message))
+                return
+        team = discord.utils.get(message.guild.roles, id=teamid)
+        cursor = sqlConn.cursor()
+        cursor.execute('EXEC corgi.AssignCaptain ?, ?;',team.id,message.mentions[0].id)
+        sqlConn.commit()
+        cursor = sqlConn.cursor()
+        cursor.execute('EXEC corgi.AssignCaptain ?, ?;',team.id,message.mentions[0].id)
+        sqlConn.commit()
+        cursor.close()
+        captain = discord.utils.get(message.guild.roles, id=getcaptainrole(message.guild))
+        await message.mentions[0].add_roles(team)
+        await message.mentions[0].add_roles(captain)
+        embed = discord.Embed(title="Assign New Captain", color=team.colour) 
+        embed.add_field(name="Old Captain Name", value=message.author.display_name, inline=False)
+        embed.add_field(name="Old Captain ID", value=message.author.id, inline=False)
+        embed.add_field(name="New Captain Name", value=message.mentions[0].display_name, inline=False)
+        embed.add_field(name="New Captain ID", value=message.mentions[0].id, inline=False)
+        embed.add_field(name="Team Name", value=team.name, inline=False)
+        embed.add_field(name="Team ID", value=team.id, inline=False)
+        now = datetime.utcnow()
+        embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+        logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
+        await logchannel.send(embed=embed)
+        if t == 1:
+            await message.author.remove_roles(captain)
+            embed = discord.Embed(title="Removed Captain Role", color=captain.colour) 
+            embed.add_field(name="Captain Name", value=message.author.display_name, inline=False)
+            embed.add_field(name="Captain ID", value=message.author.id, inline=False)
+            now = datetime.utcnow()
+            embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+            logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
+            await logchannel.send(embed=embed)
+    return
+
 async def removeteam(role):
     category = discord.utils.get(role.guild.categories, name=role.name)
     if not(category is None):
@@ -752,14 +996,17 @@ async def removeteam(role):
             await channel.delete()
         await category.delete()
     cursor = sqlConn.cursor()
-    cursor.execute('EXEC corgi.DeleteTeam ?;',role.id)
+    cursor.execute('EXEC corgi.DeleteTeam ?;',role.id) 
     sqlConn.commit()
     cursor.close()
 
-async def reassigncaptain(member):
+async def reassigncaptain(member,retain):
     teamcaptain = discord.utils.get(member.guild.roles, id=getcaptain(member.guild))
     cursor = sqlConn.cursor()
-    cursor.execute('EXEC corgi.ReassignCaptain ?;',member.id)
+    if retain is None:
+        cursor.execute('EXEC corgi.ReassignCaptain ?, ?;',member.guild.id,member.id)
+    else:
+        cursor.execute('EXEC corgi.ReassignCaptain ?, ?, 1;',member.guild.id,member.id)
     for row in cursor:
         newcaptain = discord.utils.get(member.guild.members, id=row[1])
         team = discord.utils.get(member.guild.roles, id=row[0])
@@ -775,22 +1022,25 @@ async def reassigncaptain(member):
         await logchannel.send(embed=embed)
     sqlConn.commit()
     cursor.close()
-    
 
 async def clearcaptain(member):
-    outercursor = sqlConn2.cursor()
-    outercursor.execute('EXEC corgi.ClearCaptain ?;',member.id)
-    for row in outercursor:
+    cursor = sqlConn.cursor()
+    cursor.execute('EXEC corgi.ClearCaptain ?, ?;',member.guild.id,member.id)
+    teams = []
+    for row in cursor:
         team = discord.utils.get(member.guild.roles, id=row[0])
+        teams.append(team.id)
+    sqlConn.commit()
+    cursor.close()
+    for remove in teams:
+        team = discord.utils.get(member.guild.roles, id=remove)
         await removeteam(team)
+        await team.delete()
         embed = discord.Embed(title="Team Deleted Automatically", color=team.colour) 
         embed.add_field(name="Team Name", value=team.name, inline=False)
         embed.add_field(name="Team ID", value=team.id, inline=False)
         now = datetime.utcnow()
         embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
-        logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
+        logchannel = discord.utils.get(member.guild.channels, name="corgi-logs")
         await logchannel.send(embed=embed)
-        await team.delete()
-    sqlConn2.commit()
-    outercursor.close()
-
+    
