@@ -46,6 +46,8 @@ timezones = {"PST":{"Name":"Pacific Standard Time", "Offset":-8, "Hours":-8, "Mi
              "AEST":{"Name":"Australian Eastern Standard Time", "Offset":10, "Hours":10, "Minutes":0},"AEDT":{"Name":"Australian Eastern Daylight Saving Time", "Offset":11, "Hours":11, "Minutes":0},
              "NZST":{"Name":"New Zealand Standard Time", "Offset":12, "Hours":12, "Minutes":0},"NZDT":{"Name":"New Zealand Daylight Time", "Offset":13, "Hours":13, "Minutes":0}}
              
+client = discord.Client()
+
 def validatetz(tz):
     try:
         offset = timezones[tz]
