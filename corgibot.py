@@ -17,7 +17,8 @@ directory = os.path.dirname(os.path.realpath(__file__))
 load_dotenv()
 key = os.getenv('DISCORD_KEY')
 status = os.getenv('DISCORD_STATUS')
-owner =  os.getenv('DISCORD_OWNER')
+owner = os.getenv('DISCORD_OWNER')
+debugon = os.getenv('DEBUG')
 
 #SQLServer = os.getenv('SQL_SERVER')
 #SQLDatabase = os.getenv('SQL_DATABASE')
@@ -36,19 +37,7 @@ timezones = {"PST":{"Name":"Pacific Standard Time", "Offset":-8, "Hours":-8, "Mi
              "MST":{"Name":"Mountain Standard Time", "Offset":-7, "Hours":-7, "Minutes":0},"MDT":{"Name":"Mountain Daylight Time", "Offset":-6, "Hours":-6, "Minutes":0},
              "CST":{"Name":"Central Standard Time", "Offset":-6, "Hours":-6, "Minutes":0},"CDT":{"Name":"Central Daylight Time", "Offset":-5, "Hours":-5, "Minutes":0},
              "EST":{"Name":"Eastern Standard Time", "Offset":-5, "Hours":-5, "Minutes":0},"EDT":{"Name":"Eastern Daylight Time", "Offset":-4, "Hours":-4, "Minutes":0},
-             "UTC":{"Name":"Universal Time Constant", "Offset":0, "Hours":0, "Minutes":0},
-             "GMT":{"Name":"Greenwich Mean Time", "Offset":0, "Hours":0, "Minutes":0},"BST":{"Name":"British Summer Time", "Offset":1, "Hours":1, "Minutes":0},
-             "CET":{"Name":"Central European Time", "Offset":1, "Hours":1, "Minutes":0},"CEST":{"Name":"Central Europe Summer Time", "Offset":2, "Hours":2, "Minutes":0},
-             "EET":{"Name":"Eastern European Time", "Offset":2, "Hours":2, "Minutes":0},"EEST":{"Name":"Eastern Europe Summer Time", "Offset":3, "Hours":3, "Minutes":0},
-             "WST":{"Name":"(Australian) Western Standard Time", "Offset":8, "Hours":8, "Minutes":0},
-             "ACST":{"Name":"Australian Central Standard Time", "Offset":9.5, "Hours":9, "Minutes":30},"ACDT":{"Name":"Australian Central Daylight Saving Time", "Offset":10.5, "Hours":10, "Minutes":30},
-             "AEST":{"Name":"Australian Eastern Standard Time", "Offset":10, "Hours":10, "Minutes":0},"AEDT":{"Name":"Australian Eastern Daylight Saving Time", "Offset":11, "Hours":11, "Minutes":0},
-             "NZST":{"Name":"New Zealand Standard Time", "Offset":12, "Hours":12, "Minutes":0},"NZDT":{"Name":"New Zealand Daylight Time", "Offset":13, "Hours":13, "Minutes":0}}
-             
-
-
-client = discord.Client()
-
+             "UTC":{"Name":"Universal Time Constant", "Offset":0, "Hours":$addeventdetail
 def validatetz(tz):
     try:
         offset = timezones[tz]
@@ -66,8 +55,8 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-
-    print('Message from {0.author}: {0.content}'.format(message))
+    if not(debugon is None):
+        print('Message from {0.author}: {0.content}'.format(message))
 
     if message.channel.type == discord.ChannelType.private:
         return
