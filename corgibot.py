@@ -98,9 +98,6 @@ async def on_message(message):
     rng = random.randint(1,500)
     stick = client.get_emoji(735827082151723029)
     #print("Random Number was: " + str(rng))
-    if rng % 50 == 0:        
-        if stick:
-            await message.add_reaction(stick)
     
     if rng == 100:        
         image = directory + "/images/corgilurk.gif"
@@ -474,6 +471,61 @@ async def on_message(message):
         if message.content.lower().startswith("$removecaptain"):
             await teams.removecaptain(client,message)
             return
+
+    if not(debugon is None):
+        print('Random Number is:' + str(rng))
+    
+    if rng % 50 == 0:
+        directions = ["⬅️","⬆️","➡️","⬇️"]
+        def isStick(r,u):
+            return r.message.id == stickmessage.id and u.id == message.author.id and r.emoji == stick
+        def isThrow(r,u):
+            return r.message.id == throw.id and u.id == message.author.id and r.emoji in ("⬅️","⬆️","➡️","⬇️")
+        stickmessage = message
+        play = True
+        success = 0
+        while play == True:
+            if stick:
+                await stickmessage.add_reaction(stick)
+                try:
+                    reply = await client.wait_for('reaction_add',check=isStick,timeout=10)
+                except:
+                    #Got bored waiting
+                    return
+                direction = random.randint(0,3)
+                
+                if not(debugon is None):
+                    print('Random Direction is:' + str(direction))
+                    print('Random Direction is:' + str(directions[direction]))
+                response = "Where will you throw the stick?"
+                throw = await message.channel.send(response.format(message))
+                await throw.add_reaction("⬅️")
+                await throw.add_reaction("⬆️")
+                await throw.add_reaction("➡️")
+                await throw.add_reaction("⬇️")
+                try:
+                    reply = await client.wait_for('reaction_add',check=isThrow,timeout=10)
+                    if message != stickmessage:
+                        await stickmessage.delete()
+                except:
+                    if message != stickmessage:
+                        await stickmessage.delete()
+                    await throw.delete()
+                    response = "*Looks bored and walks off.* (" + str(success) + " successful throws)"
+                    stickmessage = await message.channel.send(response.format(message))
+                    #Got bored waiting
+                    return               
+                if directions[direction] == reply[0].emoji:
+                    success = success + 1
+                    response = "*Runs after the stick, and returns it.* (" + str(success) + " successful throws)"
+                    stickmessage = await message.channel.send(response.format(message))
+                    await throw.delete()
+                else:
+                    response = "*Looks at you puzzled.* (" + str(success) + " successful throws)"
+                    await message.channel.send(response.format(message))
+                    await throw.delete()
+                    play = False
+            
 
 @client.event
 async def on_guild_role_delete(role):
