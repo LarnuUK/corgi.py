@@ -133,7 +133,7 @@ async def createteam(message):
             response = "A team, role or category with that name already exists on the server. Please choose a different name."
             await message.channel.send(response.format(message))
             return
-        newteam = await message.guild.create_role(name=teamname, hoist=True)
+        newteam = await message.guild.create_role(name=teamname, hoist=False, mentionable=True)
         colour = int("0x"+str(randomcolour()),16)
         await newteam.edit(colour=discord.Colour(colour))
         await newteam.edit(position=2) 
@@ -207,7 +207,7 @@ async def registerteam(client,message):
                 await message.channel.send(response.format(message))
                 return
             elif t == 1:
-                response = "Register team" + teamnames[0] + " for " + eventname + "?"
+                response = "Register team " + teamnames[0] + " for " + eventname + "?"
                 choice = await message.channel.send(response.format(message))
                 await choice.add_reaction(greenTick)
                 await choice.add_reaction(greenCross)
