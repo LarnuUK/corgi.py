@@ -475,7 +475,7 @@ async def on_message(message):
     if not(debugon is None):
         print('Random Number is:' + str(rng))
     
-    if rng % 50 == 0:
+    if rng % 50 == 0 or (message.channel.name.lower().startswith('bot') and message.content.lower() == 'play fetch'):
         directions = ["⬅️","⬆️","➡️","⬇️"]
         def isStick(r,u):
             return r.message.id == stickmessage.id and u.id == message.author.id and r.emoji == stick
