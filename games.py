@@ -72,31 +72,33 @@ async def playfetch(client,message):
                 await throw.delete()
             else:
                 hiscore = addfetchscore(message,success)
-                response = "*Looks at you puzzled.* (" + str(success) + " successful throws. Your hiscore is " + str(hiscore) + ")"
+                response = "*Looks at you puzzled.* (" + str(success) + " successful throws. Your high score is " + str(hiscore) + ")"
                 await message.channel.send(response.format(message))
                 await throw.delete()
                 play = False
 
 async def fetchhiscores(message):
     cursor = sqlConn.cursor()
+    #await message.guild.chunk(cache=True)
     cursor.execute('EXEC corgi.GetFetchLeaderboard ?, ?;',message.guild.id,message.author.id)
     UserDID = None
     Fetches = None
     Rank = None
     Row = None
-    HiScores = "```none\nRank|User                |Fetches\n----|--------------------|-------"
+    HiScores = "```none\nRank|User                            |Fetches\n----|--------------------------------|-------"
     for scores in cursor:
         UserDID=scores[0]
         Fetches=scores[1]
         Rank=scores[2]
-        User = discord.utils.get(message.guild.members, id=UserDID)
+        #User = discord.utils.get(message.guild.members, id=UserDID)
+        User = message.guild.get_member(UserDID)
         if User is None:
             Username = "Left User (" + str(UserDID) + ")"
         else:
             Username = User.display_name
-        Row = "\n" + ("    " + str(Rank))[-4:] + "|" + (Username + "                    ")[:20] + "|" + str(Fetches)
+        Row = "\n" + ("    " + str(Rank))[-4:] + "|" + (Username + "                                ")[:32] + "|" + str(Fetches)
         if Rank > 10:
-            HiScores = HiScores + "\n----|--------------------|-------"
+            HiScores = HiScores + "\n----|--------------------------------|-------"
         HiScores = HiScores + Row
     HiScores = HiScores + "\n```"
     HiScores = HiScores.format(HiScores)
