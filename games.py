@@ -25,6 +25,7 @@ def addfetchscore(message,score):
 
 async def playfetch(client,message):
     stick = client.get_emoji(735827082151723029)
+    lurk = client.get_emoji(736190606254145548)
     directions = ["⬅️","⬆️","➡️","⬇️"]
     def isStick(r,u):
         return r.message.id == stickmessage.id and u.id == message.author.id and r.emoji == stick
@@ -35,11 +36,22 @@ async def playfetch(client,message):
     success = 0
     while play == True:
         if stick:
+            if success == 1:
+                throws = "throw"
+            else:
+                throws = "throws"
             await stickmessage.add_reaction(stick)
             try:
                 reply = await client.wait_for('reaction_add',check=isStick,timeout=10)
             except:
-                #Got bored waiting
+                if success == 0:
+                    await stickmessage.remove_reaction(stick,client.user)
+                    await stickmessage.add_reaction(lurk)
+                else:
+                    await throw.delete()
+                    hiscore = addfetchscore(message,success)
+                    response = "*Looks bored and walks off.* (" + str(success) + " successful " + throws + ". Your hiscore is " + str(hiscore) + ".)"
+                    stickmessage = await message.channel.send(response.format(message))
                 return
             direction = random.randint(0,3)
             
@@ -61,18 +73,17 @@ async def playfetch(client,message):
                     await stickmessage.delete()
                 await throw.delete()
                 hiscore = addfetchscore(message,success)
-                response = "*Looks bored and walks off.* (" + str(success) + " successful throws. Your hiscore is " + str(hiscore) + ")"
+                response = "*Looks bored and walks off.* (" + str(success) + " successful " + throws + ". Your hiscore is " + str(hiscore) + ".)"
                 stickmessage = await message.channel.send(response.format(message))
-                #Got bored waiting
                 return               
             if directions[direction] == reply[0].emoji:
                 success = success + 1
-                response = "*Runs after the stick, and returns it.* (" + str(success) + " successful throws)"
+                response = "*Runs after the stick, and returns it.* (" + str(success) + " successful " + throws + ".)"
                 stickmessage = await message.channel.send(response.format(message))
                 await throw.delete()
             else:
                 hiscore = addfetchscore(message,success)
-                response = "*Looks at you puzzled.* (" + str(success) + " successful throws. Your high score is " + str(hiscore) + ")"
+                response = "*Looks at you puzzled.* (" + str(success) + " successful " + throws + ". Your high score is " + str(hiscore) + ".)"
                 await message.channel.send(response.format(message))
                 await throw.delete()
                 play = False
