@@ -26,7 +26,7 @@ def addfetchscore(message,score):
 async def playfetch(client,message):
     stick = client.get_emoji(735827082151723029)
     lurk = client.get_emoji(736190606254145548)
-    directions = ["⬅️","⬆️","➡️","⬇️"]
+    directions = ["⬅️","⬆️","➡️","⬇️","↗️","↘️","↙️","↖️","↩","↪","⤴️","⤵️"]
     def isStick(r,u):
         return r.message.id == stickmessage.id and u.id == message.author.id and r.emoji == stick
     def isThrow(r,u):
@@ -53,17 +53,24 @@ async def playfetch(client,message):
                     response = "*Looks bored and walks off.* (" + str(success) + " successful " + throws + ". Your hiscore is " + str(hiscore) + ".)"
                     stickmessage = await message.channel.send(response.format(message))
                 return
-            direction = random.randint(0,3)
-            
+            if success < 5:
+                options = 3
+            elif success < 10:
+                options = 7
+            else:
+                options = 11
+            direction = random.randint(0,options)            
             if not(debugon is None):
                 print('Random Direction is:' + str(direction))
                 print('Random Direction is:' + str(directions[direction]))
             response = "Where will you throw the stick?"
             throw = await message.channel.send(response.format(message))
-            await throw.add_reaction("⬅️")
-            await throw.add_reaction("⬆️")
-            await throw.add_reaction("➡️")
-            await throw.add_reaction("⬇️")
+            for r in range(0,options+1):
+                await throw.add_reaction(directions[r])
+            #await throw.add_reaction("⬅️")
+            #await throw.add_reaction("⬆️")
+            #await throw.add_reaction("➡️")
+            #await throw.add_reaction("⬇️")
             try:
                 reply = await client.wait_for('reaction_add',check=isThrow,timeout=10)
                 if message != stickmessage:
