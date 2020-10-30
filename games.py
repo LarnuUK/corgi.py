@@ -30,7 +30,7 @@ async def playfetch(client,message):
     def isStick(r,u):
         return r.message.id == stickmessage.id and u.id == message.author.id and r.emoji == stick
     def isThrow(r,u):
-        return r.message.id == throw.id and u.id == message.author.id and r.emoji in ("⬅️","⬆️","➡️","⬇️")
+        return r.message.id == throw.id and u.id == message.author.id and r.emoji in directions
     stickmessage = message
     play = True
     success = 0
