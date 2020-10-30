@@ -133,3 +133,6 @@ bot.key
 
 #In progress files
 *.*~
+
+#vscode settings
+*.vscode
