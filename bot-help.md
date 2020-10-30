@@ -13,14 +13,30 @@
 
 *With the exception of `$heret`, the following commands must be used in a bot channel.*
 
+- `$LeaveTeam` - Leave a team you are a member of. If you are a Captain of the team, you will need to assign another player as the Captain first.
+- `$FetchScores` - Get the leader board for the Fetch easter egg minigame.
+
+### Team Captain Commands:
+- `$CreateTeam` - Create a Team with the provided name. For example `$CreateTeam The Speedy Turtles`
+- `$TeamColour` - Changed the colour of your Team! Use `$Colours` for supported colours.
+- `$AddPlayer` - Adds a player to a team. Must be followed by a mentioned user. For example `$AddPlayer @Dean`.
+- `$RemovePlayer` - Removes a player from a team. Must be followed by a mentioned user. For example `$RemovePlayer @Dean`.
+- `$RegisterTeam` - Register a team for a Team Event. Must be followed by an event ID. For example `$RegisterTeam 101`. If the event permits it, channels for the team will be created.
+- `$DeregisterTeam` - Deregister a team for a Team Event. Must be followed by an event ID. For example `$DeregisterTeam 101`.
+- `$RenameTeam` - Renames one of the teams you are a Captain of. Must be followed by a new Team name. For example `$RenameTeam The slow Cheetahs`.
+- `$AssignCaptain` - Change the acting Captain of a Team from yourself to another. Must be followed by a mentioned user. For example `$AssignCaptain @Thom`. If the Player is not a part of your team, they will be added to it.
+- `$DeleteTeam` - Delete a team you are a captain of. Options will be presented to you. This action **cannot** be undone if committed.
+
+
 ### Head Judge Commands:
 - `$heret` - Sets a timer for the requested time period. Time must in the format `hh:mm`. Must be followed by a message. For example `$heret 01:30 Dice down!`. On expiry the @here role will be pinged.
 - `$AddEvent` - Create an event on the server. Needs to be followed by a name for said event. For example `$AddEvent 50pt Steamroller`
 - `$AddEventDetail` - Add a detail to an existing event. Must be followed by the event's unique ID. For example `$AddEventDetail 101`.
 - `$EditEvent` - Edit the property of an event (not a detail). Must be followed by the event's unique ID. For example `$EditEvent 101`.
-- `$DeleteEvent` - Delete an event. ust be followed by the event's unique ID: For example `$DeleteEvent 101`.
+- `$DeleteEvent` - Delete an event. Must be followed by the event's unique ID: For example `$DeleteEvent 101`.
 - `$DeleteDetail` - Delete an event's detail. ust be followed by the detail's unique ID: For example `$DeleteEvent 234`.
 - `$AddCaptain` - Grants a user the Team Captain Role related to that server. Must be followed by a mentioned user. For example `$AddCaptain @Barry`.
+- `$RemoveCaptain` - Removes the Team Captain Role related to the server from the User. Must be followed by a mentioned user. For example `$RemoveCaptain @Barry`. If the Captain has made any teams, a new Team Captain will be assigned. If they have any teams that only they are part of, they will be deleted.
 
 ### Server Administrator Commands:
 - `$AddRoleAccess` - Gives a role an access level on the bot. Must be followed by a valid role/mentioned role: for example `$AddRoleAccess Team Captain`.
