@@ -896,6 +896,10 @@ async def assigncaptain(client,message):
             response = "You need to mention the new user who will be given the captaincy of the team."
             await message.channel.send(response.format(message))
             return
+        if message.mentions[0].id == message.author.id:
+            response = "You can't assign yourself as the captain."
+            await message.channel.send(response.format(message))
+            return
         teams = getcaptainteams(message.author)
         #Now because Python can't count we have to do dumb shit...
         t = 0
