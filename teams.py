@@ -214,6 +214,8 @@ async def registerteam(client,message):
                 try:
                     booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
                 except:
+                    await booleanrespond.remove_reaction(greenTick,client.user)
+                    await booleanrespond.remove_reaction(greenCross,client.user)
                     response = "No response received. Registration cancelled."
                     await message.channel.send(response.format(message))
                     return                
@@ -320,6 +322,8 @@ async def deregisterteam(client,message):
             try:
                 booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
+                await booleanrespond.remove_reaction(greenTick,client.user)
+                await booleanrespond.remove_reaction(greenCross,client.user)
                 response = "No response received. DeRegistration cancelled."
                 await message.channel.send(response.format(message))
                 return                
@@ -390,6 +394,8 @@ async def addplayer(client,message):
             try:
                 booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
+                await booleanrespond.remove_reaction(greenTick,client.user)
+                await booleanrespond.remove_reaction(greenCross,client.user)
                 response = "No response received. Player not added."
                 await message.channel.send(response.format(message))
                 return                
@@ -474,6 +480,8 @@ async def removeplayer(client,message):
             try:
                 booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
+                await booleanrespond.remove_reaction(greenTick,client.user)
+                await booleanrespond.remove_reaction(greenCross,client.user)
                 response = "No response received. Player not removed."
                 await message.channel.send(response.format(message))
                 return                
@@ -563,6 +571,8 @@ async def changecolour(client,message):
             try:
                 booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
+                await booleanrespond.remove_reaction(greenTick,client.user)
+                await booleanrespond.remove_reaction(greenCross,client.user)
                 response = "No response received. Colour not changed."
                 await message.channel.send(response.format(message))
                 return                
@@ -650,6 +660,8 @@ async def renameteam(client,message):
             try:
                 booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
+                await booleanrespond.remove_reaction(greenTick,client.user)
+                await booleanrespond.remove_reaction(greenCross,client.user)
                 response = "No response received. Name not changed."
                 await message.channel.send(response.format(message))
                 return                
@@ -730,6 +742,8 @@ async def deleteteam(client,message):
             try:
                 booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
+                await booleanrespond.remove_reaction(greenTick,client.user)
+                await booleanrespond.remove_reaction(greenCross,client.user)
                 response = "No response received. Team not deleted."
                 await message.channel.send(response.format(message))
                 return                
@@ -829,6 +843,8 @@ async def leaveteam(client,message):
         try:
             booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
         except:
+            await booleanrespond.remove_reaction(greenTick,client.user)
+            await booleanrespond.remove_reaction(greenCross,client.user)
             response = "No response received. Not left team."
             await message.channel.send(response.format(message))
             return                
@@ -925,6 +941,8 @@ async def assigncaptain(client,message):
             try:
                 booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
+                await booleanrespond.remove_reaction(greenTick,client.user)
+                await booleanrespond.remove_reaction(greenCross,client.user)
                 response = "No response received. Captain not changed."
                 await message.channel.send(response.format(message))
                 return                
