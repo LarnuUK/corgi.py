@@ -95,6 +95,86 @@ async def playfetch(client,message):
                 await throw.delete()
                 play = False
 
+async def playtugofwar(client,message):
+    rope = client.get_emoji(773528381215998002)
+    lurk = client.get_emoji(736190606254145548)
+    directions = ["⬅️","➡️","↔","↕","🔃","🔄"]
+    def isRope(r,u):
+        return r.message.id == ropemessage.id and u.id == message.author.id and r.emoji == rope
+    def isTug(r,u):
+        return r.message.id == tug.id and u.id == message.author.id and r.emoji in directions
+    ropemessage = message
+    play = True
+    success = 0
+    correct = 0
+    while play == True:
+        correct = 0
+        if rope:
+            if success == 1:
+                tugs = "game"
+            else:
+                tugs = "games"
+            await ropemessage.add_reaction(rope)
+            try:
+                reply = await client.wait_for('reaction_add',check=isRope,timeout=10)
+            except:
+                if success == 0:
+                    await ropemessage.remove_reaction(rope,client.user)
+                    await ropemessage.add_reaction(lurk)
+                else:
+                    await ropemessage.delete()
+                    await tug.delete()
+                return
+            if success > 0:
+                await ropemessage.delete()
+                await tug.delete()
+            if success < 5:
+                options = 1
+            elif success < 10:
+                options = 3
+            else:
+                options = 5
+            timer = 5
+            timer = timer-success
+            if timer < 1:
+                timer = 1
+            direction = random.randint(0,options)
+            response = "*Corgi pulls the rope is the direction:* " + directions[direction]
+            tug = await message.channel.send(response.format(message))
+            for r in range(0,options+1):
+                await tug.add_reaction(directions[r])
+            try:
+                reply = await client.wait_for('reaction_add',check=isTug,timeout=timer)
+            except:
+                response = "*Corgi pulls the rope from your grasp.*  (" + str(success) + " successful " + tugs + ".)"
+                ropemessage = await message.channel.send(response.format(message))
+                return    
+            while correct < success + 1:
+                if directions[direction] == reply[0].emoji:
+                    correct = correct + 1
+                    direction = random.randint(0,options)
+                    await tug.delete()
+                    response = "*Corgi pulls the rope is the direction:* " + directions[direction]
+                    tug = await message.channel.send(response.format(message))
+                    for r in range(0,options+1):
+                        await tug.add_reaction(directions[r])
+                    try:
+                        reply = await client.wait_for('reaction_add',check=isTug,timeout=timer)
+                    except:
+                        response = "*Corgi pulls the rope from your grasp.*  (" + str(success) + " successful " + tugs + ".)"
+                        ropemessage = await message.channel.send(response.format(message))
+                        return    
+
+                else:
+                    await tug.delete()
+                    response = "*Corgi pulls the rope from your grasp.*  (" + str(success) + " successful " + tugs + ".)"
+                    await message.channel.send(response.format(message))
+                    return
+            success = success + 1
+            response = "*You pull the rope from Corgi's grasp.*  (" + str(success) + " successful " + tugs + ".)"
+            ropemessage = await message.channel.send(response.format(message))
+    return        
+    
 async def fetchhiscores(message):
     cursor = sqlConn.cursor()
     #await message.guild.chunk(cache=True)
@@ -125,3 +205,4 @@ async def fetchhiscores(message):
     embed = discord.Embed(color=discord.Colour.orange()) #description=message.mentions[0].display_name
     embed.add_field(name="Fetch High Scores", value=HiScores, inline=False)
     await message.channel.send(embed=embed)
+    return
