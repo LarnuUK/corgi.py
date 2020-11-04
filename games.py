@@ -171,7 +171,11 @@ async def playtugofwar(client,message):
                     await message.channel.send(response.format(message))
                     return
             success = success + 1
-            response = "*You pull the rope from Corgi's grasp.*  (" + str(success) + " successful " + tugs + ".)"
+            if success == 1:
+                tugs = "game"
+            else:
+                tugs = "games"
+            response = "*You pull the rope from Corgi's grasp.*  (" + str(success+1) + " successful " + tugs + ".)"
             ropemessage = await message.channel.send(response.format(message))
     return        
     
