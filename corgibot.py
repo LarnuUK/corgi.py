@@ -490,9 +490,9 @@ async def on_guild_role_delete(role):
     await access.removeaccesslevel(role.guild,role)
     await teams.removeteam(role)
 
-@client.event
-async def on_member_remove(member):
-    await teams.reassigncaptain(member,None)
-    await teams.clearcaptain(member)
+#@client.event
+#async def on_member_remove(member):
+#    await teams.reassigncaptain(member,None)
+#    await teams.clearcaptain(member)
 
 client.run(key)

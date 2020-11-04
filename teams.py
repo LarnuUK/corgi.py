@@ -1024,6 +1024,7 @@ async def removeteam(role):
     cursor.close()
 
 async def reassigncaptain(member,retain):
+    return
     teamcaptain = discord.utils.get(member.guild.roles, id=getcaptain(member.guild))
     cursor = sqlConn.cursor()
     if retain is None:
