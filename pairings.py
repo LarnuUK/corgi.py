@@ -86,11 +86,11 @@ async def german(client,message):
         return
     response = winningPlayer.display_name + " has chosen to play the following card on table " + firstTable + ": " + winnerFirstPlayer.content + "\n" + losingPlayer.display_name + " has chosen to play the following card on table " + secondTable + ": " + loserFirstPlayer.content
     await message.channel.send(response.format(message))
-    response = winningPlayer.display_name + " please respond to the DM to confirm what card will be played on table " + secondTable + "."
+    response = winningPlayer.display_name + " please respond to the DM to confirm what card will be played on table " + firstTable + "."
     await message.channel.send(response.format(message))
 
     #Get Winning Player Second Card
-    dm = "Please respond with the Player Name, and their casters, that you would like to play on table " + secondTable + ". This will be against the following card: " + loserFirstPlayer.content + ". For example: Ryan, Harbinger and Feora4"
+    dm = "Please respond with your Opponent's Player Name, and their casters, that you would like to play against on table " + firstTable + ". This will be against your card: " + winnerFirstPlayer.content + ". For example: Ryan, Harbinger and Feora4"
     await winningPlayer.send(dm.format(message))
     try:
         winnerSecondPlayer = await client.wait_for('message',check=winnerDm,timeout=600)
@@ -98,11 +98,11 @@ async def german(client,message):
         response = "No response received to DM. Pairing cancelled."
         await message.channel.send(response.format(message))
         return
-    response = winningPlayer.display_name + " has chosen their second card. " + losingPlayer.display_name + " please reply to the DM to confirm the player, and casters, that will you will be placing on table " + firstTable + "."
+    response = winningPlayer.display_name + " has chosen their second card. " + losingPlayer.display_name + " please reply to the DM to confirm the player, and casters, that will you will be placing on table " + secondTable + "."
     await message.channel.send(response.format(message))
 
     #Get Losing Player Second Card
-    dm = "Please respond with the Player Name, and their casters, that you would like to play on table " + firstTable + ". This will be against the following card: " + winnerFirstPlayer.content + ".  For example: Ryan, Harbinger and Feora4"
+    dm = "Please respond with your Opponent's Player Name, and their casters, that you would like to play against on table " + secondTable + ". This will be against your card: " + winnerFirstPlayer.content + ".  For example: Ryan, Harbinger and Feora4"
     await losingPlayer.send(dm.format(message))
     try:
         loserSecondPlayer = await client.wait_for('message',check=loserDm,timeout=600)
@@ -114,8 +114,8 @@ async def german(client,message):
     opponents = "All player cards have been chosen!\n"
     #Tell people who they are playing
     if firstTable == oneDigit:
-        opponents = opponents + "1️⃣: " + winnerFirstPlayer.content + " **VS** " + loserSecondPlayer.content + "\n2️⃣: Players that were not selected.\n3️⃣: " + winnerSecondPlayer.content + " **VS** " + loserFirstPlayer.content
+        opponents = opponents + "1️⃣: " + winnerFirstPlayer.content + " **VS** " + winnerSecondPlayer.content + "\n2️⃣: Players that were not selected.\n3️⃣: " + loserSecondPlayer.content + " **VS** " + loserFirstPlayer.content
     else:
-        opponents = opponents + "1️⃣: " + winnerSecondPlayer.content + " **VS** " + loserFirstPlayer.content + "\n2️⃣: Players that were not selected.\n3️⃣: " + winnerFirstPlayer.content + " **VS** " + loserSecondPlayer.content
+        opponents = opponents + "1️⃣: " + winnerSecondPlayer.content + " **VS** " + winnerFirstPlayer.content + "\n2️⃣: Players that were not selected.\n3️⃣: " + loserFirstPlayer.content + " **VS** " + loserSecondPlayer.content
     await message.channel.send(opponents.format(message))
     return
