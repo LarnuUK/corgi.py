@@ -6,8 +6,7 @@ from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
 
-from rulewordings import throwrules, slamrules
-import pairings, access, teams, events, games
+import pairings, access, teams, events, games, rulewordings
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -125,13 +124,31 @@ async def on_message(message):
         return
 
     if message.content.lower() == "how i throw":
-        rules = throwrules()
+        rules = rulewordings.throwrules()
         for rule in rules:
             await message.channel.send(rule.format(message))
         return
 
     if message.content.lower() == "how i slam":
-        rules = slamrules()
+        rules = rulewordings.slamrules()
+        for rule in rules:
+            await message.channel.send(rule.format(message))
+        return
+
+    if message.content.lower() == "how i attack":
+        rules = rulewordings.attackrules()
+        for rule in rules:
+            await message.channel.send(rule.format(message))
+        return
+
+    if message.content.lower() == "how i activate":
+        rules = rulewordings.activaterules()
+        for rule in rules:
+            await message.channel.send(rule.format(message))
+        return
+
+    if message.content.lower() == "how i spell":
+        rules = rulewordings.spellcastrules()
         for rule in rules:
             await message.channel.send(rule.format(message))
         return

@@ -45,8 +45,71 @@ If a slammed model contacts a model with an equal or smaller base or moves throu
 
 If a slammed model cannot be knocked down it must still forfeit its Normal Movement or Combat Action if it activates later in a turn in which it was slammed."""]
 
+attack = ["""1. Declare the attack and its target.
+2. Resolve effects that occur when a model is targeted by an attack.
+3. Check the range to the target. If the target is out of range, the attack automatically misses; do not make
+any attack rolls, and go to step 6.
+4. Resolve effects that cause an attack to hit or miss
+automatically.
+5. Make all attack rolls as dictated by the type of attack and its special rules. For example, a spray attack or Thresher special attack must go through the attack roll sequence for each model potentially hit before proceeding to step 6.""",
+""">>> **Attack Roll**
+a. Resolve effects that change the number of dice rolled, such as boosting the roll.
+b. Roll the dice.
+c. Resolve effects that remove dice from the roll.
+d. Determine if the model would be hit or missed by the attack roll against it.
+e. Resolve effects that cause the attack roll to be rerolled. Return to step b if needed. When returning to step b, add all dice removed in step c back to the roll.""",
+"""6. Resolve effects that cause the attack to automatically hit a model other than the target.
+7. Resolve the AOE hit or deviation. All models within the AOE at its final position are now hit by it.
+8. Resolve all other effects triggered by hitting or missing.
+9. Make all damage rolls resulting from the attack.""",
+""">>> **Damage Roll**
+a. Resolve effects that change the number of dice rolled, such as boosting the roll.
+b. Roll the dice.
+c. Resolve effects that remove dice from the roll.
+d. Determine if the roll would damage the model.
+e. Resolve effects that cause the damage roll to be rerolled. Return to step b if needed. When returning to step b, add all dice removed in step c back to the roll.
+f. Resolve effects triggered by a damage roll that fails to exceed the ARM of a model hit.
+g. Resolve effects that trigger when a model “would suffer damage” such as damage transference.""",
+"""10. Apply all damage.""",
+"""**Damage Application**
+If an attack damaged more than one model, choose one model, follow the damage application sequence below, then repeat for each other damaged model.
+>>> a. Resolve effects triggered by a model suffering damage.
+b. If all of a model’s damage boxes are marked, the model is disabled. Resolve effects triggered by the model becoming disabled.
+c. If the model is still disabled, it becomes boxed. Resolve effects triggered by the model becoming boxed.
+d. If the model is still boxed, it is destroyed. Resolved effects triggered by a model being destroyed.
+e. Remove the destroyed model from the table, then return to the main sequence.""",
+"""11. The attack is now resolved.
+12. Resolve active player effects that trigger “after the attack is resolved” that do not involve making another attack.
+13. Resolve all inactive player effects that trigger “after the attack is resolved.”
+14. Resolve active player effects that trigger “after the attack is resolved” that involve making an attack."""]
+
+activation = ["""1. Resolve effects that occur at the start of activation, including the unit commander issuing an order to its unit.
+2. Resolve all required forfeitures of Normal Movement and Combat Action. You cannot use “at any time” abilities or forfeit your Normal Movement or Combat
+3. Action voluntarily before this step is resolved. Resolve effects that occur before Normal Movement.
+4. The model makes its Normal Movement.
+5. Resolve effects that occur at the end of Normal Movement.
+6. If activating a unit, repeat steps 4 and 5 for each trooper, then resolve effects that occur at the end of the unit’s Normal Movement.
+7. The model makes its Combat Action.
+8. Resolve effects that occur at the end of a model’s Combat Action.
+9. If activating a unit, repeat steps 7 and 8 for each trooper, then resolve effects that occur at the end of the unit’s Combat Action."""]
+
+spellcast = ["""1. Declare the spell being used and pay its COST (by spending focus or fury, being forced to use an animus, using the model's combat action to perform a special action, etc.).
+2. Declare the spell’s target.
+3. Resolve effects that occur when a model is targeted by a spell.
+4. If the spell is not an Offensive spell, check the range to the target. If the target is in range, it is affected by the spell. If the spell is an Offensive spell, resolve the spell using the Attack Sequence timing beginning with "Check range to the target."
+5. If the spell is not an Offensive spell, the spell is now resolved. If the spell is an Offensive spell, it is resolved when you reach "The attack is now resolved" during the Attack Sequence timing."""]
+
 def throwrules():
     return throw
 
 def slamrules():
     return slam
+
+def attackrules():
+    return attack
+
+def activaterules():
+    return activation
+
+def spellcastrules():
+    return spellcast
