@@ -482,7 +482,8 @@ async def on_message(message):
         await games.playfetch(client,message)
 
     if ((rng % 25 == 0 and not(rng % 50 == 0)) or (message.channel.name.lower().startswith('bot') and message.content.lower() == 'play tug of war')) and not(message.content.lower() == 'play fetch'):
-        await games.playtugofwar(client,message)
+        #await games.playtugofwar(client,message)
+        print("Game Disabled")
             
 
 @client.event
