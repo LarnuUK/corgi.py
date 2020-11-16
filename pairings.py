@@ -102,7 +102,7 @@ async def german(client,message):
     await message.channel.send(response.format(message))
 
     #Get Losing Player Second Card
-    dm = "Please respond with your Opponent's Player Name, and their casters, that you would like to play against on table " + secondTable + ". This will be against your card: " + winnerFirstPlayer.content + ".  For example: Ryan, Harbinger and Feora4"
+    dm = "Please respond with your Opponent's Player Name, and their casters, that you would like to play against on table " + secondTable + ". This will be against your card: " + loserFirstPlayer.content + ".  For example: Ryan, Harbinger and Feora4"
     await losingPlayer.send(dm.format(message))
     try:
         loserSecondPlayer = await client.wait_for('message',check=loserDm,timeout=600)
