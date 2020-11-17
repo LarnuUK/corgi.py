@@ -116,6 +116,6 @@ async def german(client,message):
     if firstTable == oneDigit:
         opponents = opponents + "1️⃣: " + winnerFirstPlayer.content + " **VS** " + winnerSecondPlayer.content + "\n2️⃣: Players that were not selected.\n3️⃣: " + loserSecondPlayer.content + " **VS** " + loserFirstPlayer.content
     else:
-        opponents = opponents + "1️⃣: " + winnerSecondPlayer.content + " **VS** " + winnerFirstPlayer.content + "\n2️⃣: Players that were not selected.\n3️⃣: " + loserFirstPlayer.content + " **VS** " + loserSecondPlayer.content
+        opponents = opponents + "1️⃣: " + loserFirstPlayer.content + " **VS** " + loserSecondPlayer.content + "\n2️⃣: Players that were not selected.\n3️⃣: " + winnerSecondPlayer.content + " **VS** " + winnerFirstPlayer.content
     await message.channel.send(opponents.format(message))
     return
