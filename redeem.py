@@ -15,6 +15,13 @@ SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer + '
 
 sqlConn = pyodbc.connect(SQLConnString,timeout=20)
 
+def validint(string):
+    try:
+        intval = int(string)
+        return True
+    except:
+        return False
+
 async def redeempurchase(client,message):
     def isUser(m):
         return m.author.id == message.author.id and m.channel.type == discord.ChannelType.private
@@ -24,7 +31,11 @@ async def redeempurchase(client,message):
 *Please note that messages regarding purchase redemption are logged, and will be retained until shortly after the conclusion of Fishcon 2021. Please contact a member of the Fishcon Committee should you have any concerns.*"""
     await message.author.send(dm.format(message))
     orderno = await client.wait_for('message',check=isUser,timeout=300)
-    dm = "Thanks! Can you also please confirm the email address that you use to make your purchase."
+    while not validint(orderno.content):
+        dm = "I'm sorry, that isn't a valid order number. Please enter a valid order number. For example 7890."
+        await message.author.send(dm.format(message))
+        orderno = await client.wait_for('message',check=isUser,timeout=150)
+    dm = "Thanks! Can you also please confirm the email address that you used to make your purchase."
     await message.author.send(dm.format(message))
     email = await client.wait_for('message',check=isUser,timeout=150)
     dm = "Thanks. I am now validating your details."
@@ -38,7 +49,7 @@ async def redeempurchase(client,message):
         purchaseID = row[1]
     cursor.close()
     if sku is None:
-        dm = "Unfortunately I was unable to find your purchase. If you would like to try again, please use the !redeem command again. If you continue to fail validation, please contact a member of the Fishcon Committee, and they will be happy to help."
+        dm = "Unfortunately I was unable to find your purchase. If you would like to try again, please use the $redeem command again. If you continue to fail validation, please contact a member of the Fishcon Committee, and they will be happy to help."
         await message.author.send(dm.format(message))
     elif sku.startswith("FISC"):
         fishconroleid = 787360415524716564
