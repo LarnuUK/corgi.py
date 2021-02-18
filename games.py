@@ -12,7 +12,7 @@ SQLPassword = os.getenv('SQL_PASSWORD')
 
 SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer + ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
 
-sqlConn = pyodbc.connect(SQLConnString)
+sqlConn = pyodbc.connect(SQLConnString,timeout=20)
 
 def addfetchscore(message,score):
     cursor = sqlConn.cursor()
