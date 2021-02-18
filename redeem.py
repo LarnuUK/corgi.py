@@ -40,7 +40,7 @@ async def redeempurchase(client,message):
     if sku is None:
         dm = "Unfortunately I was unable to find your purchase. If you would like to try again, please use the !redeem command again. If you continue to fail validation, please contact a member of the Fishcon Committee, and they will be happy to help."
         await message.author.send(dm.format(message))
-    elif sku.lower().startswith("FISC"):
+    elif sku.startswith("FISC"):
         fishconroleid = 787360415524716564
         fishconrole = discord.utils.get(message.guild.roles, id=fishconroleid)
         await message.author.add_roles(fishconrole)
