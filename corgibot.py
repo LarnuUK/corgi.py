@@ -67,6 +67,8 @@ async def on_message(message):
         print('Message from {0.author}: {0.content}'.format(message))
 
     if message.channel.type == discord.ChannelType.private:
+        if message.content.lower().startswith("$redeem"):
+            await redeem.redeempurchase(client,message)
         return
 
     serverRoles = message.guild.roles
