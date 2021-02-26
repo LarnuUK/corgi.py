@@ -41,7 +41,15 @@ async def redeempurchase(client,message):
     dm = "Thanks. I am now validating your details."
     await message.author.send(dm.format(message))
     cursor = sqlConn.cursor()
-    cursor.execute('EXEC corgi.ValidatePurchase ?, ?;',orderno.content,email.content)
+    try:
+        cursor.execute('EXEC corgi.ValidatePurchase ?;',orderno.content,email.content)
+    except pyodbc.Error as ex:
+        dm = "Error: " + ex.args[0] + " - " + ex.args[1]
+        await message.author.send(dm.format(message))
+        dm = "Sorry I was unable to redeem you ticket due to an error. Please contact a member of the Fishcon Committee (you can ping them in Fiscord with `@Fishcord Committee`) whom will be able to help you."
+        await message.author.send(dm.format(message))
+        cursor.close()
+        return
     sku = None
     purchaseID = None
     for row in cursor:
@@ -49,7 +57,7 @@ async def redeempurchase(client,message):
         purchaseID = row[1]
     cursor.close()
     if sku is None:
-        dm = "Unfortunately I was unable to find your purchase. If you would like to try again, please use the $redeem command again. If you continue to fail validation, please contact a member of the Fishcon Committee, and they will be happy to help."
+        dm = "Unfortunately I was unable to find your Fishcon ticket purchase with the information supplied. If you would like to try again, please use the $redeem command again. If you continue to fail validation, please contact a member of the Fishcon Committee, and they will be happy to help."
         await message.author.send(dm.format(message))
     elif sku.startswith("FISC"):
         fishconroleid = 787360415524716564
@@ -61,3 +69,4 @@ async def redeempurchase(client,message):
         cursor.execute('EXEC corgi.RedeemPurchase ?;',purchaseID)
         cursor.commit()
         cursor.close()
+    return
