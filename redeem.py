@@ -42,7 +42,7 @@ async def redeempurchase(client,message):
     await message.author.send(dm.format(message))
     cursor = sqlConn.cursor()
     try:
-        cursor.execute('EXEC corgi.ValidatePurchase ?;',orderno.content,email.content)
+        cursor.execute('EXEC corgi.ValidatePurchase ?, ?;',orderno.content,email.content)
     except pyodbc.Error as ex:
         dm = "Error: " + ex.args[0] + " - " + ex.args[1]
         await message.author.send(dm.format(message))
