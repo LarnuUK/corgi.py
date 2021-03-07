@@ -480,8 +480,8 @@ async def removeplayer(client,message):
             try:
                 booleanrespond = await client.wait_for('reaction_add',check=booleanResponse,timeout=10)
             except:
-                await booleanrespond.remove_reaction(greenTick,client.user)
-                await booleanrespond.remove_reaction(greenCross,client.user)
+                #await booleanrespond.remove_reaction(greenTick,client.user)
+                #await booleanrespond.remove_reaction(greenCross,client.user)
                 response = "No response received. Player not removed."
                 await message.channel.send(response.format(message))
                 return                
