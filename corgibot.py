@@ -506,11 +506,12 @@ async def on_message(message):
         print('Random Number is:' + str(rng))
     
     if (rng % 50 == 0 or (message.channel.name.lower().startswith('bot') and message.content.lower() == 'play fetch')) and not(message.content.lower() == 'play tug of war'):
+        print("Playing Fetch Game")
         await games.playfetch(client,message)
 
     if ((rng % 25 == 0 and not(rng % 50 == 0)) or (message.channel.name.lower().startswith('bot') and message.content.lower() == 'play tug of war')) and not(message.content.lower() == 'play fetch'):
         #await games.playtugofwar(client,message)
-        print("Game Disabled")
+        print("Tug of War Game Disabled")
             
 
 @client.event
