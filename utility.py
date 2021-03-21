@@ -15,7 +15,7 @@ async def loscheck(client,message):
     def isSameChannel(m):
         return m.channel.id == reply.channel.id and m.author.id == message.author.id
         
-    response = "Is the model you are drawing LOS *from* a 🇸mall, 🇲edium, 🇱arge, or 🇭uge base model?"
+    response = "Is the model you are drawing LOS ***from*** a 🇸mall, 🇲edium, 🇱arge, or 🇭uge base model?"
     size = await message.channel.send(response.format(message))
     await size.add_reaction("🇸")
     await size.add_reaction("🇲")
@@ -35,7 +35,7 @@ async def loscheck(client,message):
         m1 = "l"
     elif m1size[0].emoji == "🇭":
         m1 = "h"
-    response = "Is the model you are drawing LOS *to* a 🇸mall, 🇲edium, 🇱arge, or 🇭uge base model?"
+    response = "Is the model you are drawing LOS ***to*** a 🇸mall, 🇲edium, 🇱arge, or 🇭uge base model?"
     size = await message.channel.send(response.format(message))
     await size.add_reaction("🇸")
     await size.add_reaction("🇲")
