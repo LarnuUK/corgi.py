@@ -102,7 +102,7 @@ async def on_message(message):
     stick = client.get_emoji(735827082151723029)
     #print("Random Number was: " + str(rng))
     
-    if rng == 100:        
+    if rng == 99:        
         image = directory + "/images/corgilurk.gif"
         await message.channel.send(file=discord.File(image))
 
