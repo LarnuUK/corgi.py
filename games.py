@@ -12,15 +12,16 @@ SQLPassword = os.getenv('SQL_PASSWORD')
 
 SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer + ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
 
-sqlConn = pyodbc.connect(SQLConnString,timeout=20)
+#sqlConn = pyodbc.connect(SQLConnString,timeout=20)
 
 def addfetchscore(message,score):
-    cursor = sqlConn.cursor()
-    cursor.execute('EXEC corgi.AddFetchScore ?, ?, ?;',message.guild.id,message.author.id,score)
-    for scores in cursor:
-        score=scores[0]
-    sqlConn.commit()
-    cursor.close()
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with sqlConn.cursor() as cursor:
+            cursor.execute('EXEC corgi.AddFetchScore ?, ?, ?;',message.guild.id,message.author.id,score)
+            for scores in cursor:
+                score=scores[0]
+            sqlConn.commit()
+            #cursor.close()
     return score
 
 async def playfetch(client,message):
@@ -180,32 +181,33 @@ async def playtugofwar(client,message):
     return        
     
 async def fetchhiscores(message):
-    cursor = sqlConn.cursor()
-    #await message.guild.chunk(cache=True)
-    cursor.execute('EXEC corgi.GetFetchLeaderboard ?, ?;',message.guild.id,message.author.id)
-    UserDID = None
-    Fetches = None
-    Rank = None
-    Row = None
-    HiScores = "```none\nRank|User                            |Fetches\n----|--------------------------------|-------"
-    for scores in cursor:
-        UserDID=scores[0]
-        Fetches=scores[1]
-        Rank=scores[2]
-        #User = discord.utils.get(message.guild.members, id=UserDID)
-        User = message.guild.get_member(UserDID)
-        if User is None:
-            Username = "Left User (" + str(UserDID) + ")"
-        else:
-            Username = User.display_name
-        Row = "\n" + ("    " + str(Rank))[-4:] + "|" + (Username + "                                ")[:32] + "|" + str(Fetches)
-        if Rank > 10:
-            HiScores = HiScores + "\n----|--------------------------------|-------"
-        HiScores = HiScores + Row
-    HiScores = HiScores + "\n```"
-    HiScores = HiScores.format(HiScores)
-    sqlConn.commit()
-    cursor.close()
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with sqlConn.cursor() as cursor:
+            #await message.guild.chunk(cache=True)
+            cursor.execute('EXEC corgi.GetFetchLeaderboard ?, ?;',message.guild.id,message.author.id)
+            UserDID = None
+            Fetches = None
+            Rank = None
+            Row = None
+            HiScores = "```none\nRank|User                            |Fetches\n----|--------------------------------|-------"
+            for scores in cursor:
+                UserDID=scores[0]
+                Fetches=scores[1]
+                Rank=scores[2]
+                #User = discord.utils.get(message.guild.members, id=UserDID)
+                User = message.guild.get_member(UserDID)
+                if User is None:
+                    Username = "Left User (" + str(UserDID) + ")"
+                else:
+                    Username = User.display_name
+                Row = "\n" + ("    " + str(Rank))[-4:] + "|" + (Username + "                                ")[:32] + "|" + str(Fetches)
+                if Rank > 10:
+                    HiScores = HiScores + "\n----|--------------------------------|-------"
+                HiScores = HiScores + Row
+            HiScores = HiScores + "\n```"
+            HiScores = HiScores.format(HiScores)
+            sqlConn.commit()
+            #cursor.close()
     embed = discord.Embed(color=discord.Colour.orange()) #description=message.mentions[0].display_name
     embed.add_field(name="Fetch High Scores", value=HiScores, inline=False)
     await message.channel.send(embed=embed)

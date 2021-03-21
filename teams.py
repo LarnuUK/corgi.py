@@ -13,7 +13,7 @@ SQLPassword = os.getenv('SQL_PASSWORD')
 
 SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer + ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
 
-sqlConn = pyodbc.connect(SQLConnString,timeout=20)
+#sqlConn = pyodbc.connect(SQLConnString,timeout=20)
 
 colours = ["default","teal","dark teal","green","dark green","blue","dark blue","purple","dark purple","magenta","dark magenta","gold","dark gold","orange","dark orange","red","dark red","lighter grey", "dark grey", "light grey", "darker grey", "blurple", "greyple"]
 colourings = {"default":discord.Colour.default(),"teal":discord.Colour.teal(),"dark teal":discord.Colour.dark_teal(),"green":discord.Colour.green(),"dark green":discord.Colour.dark_green(),"blue":discord.Colour.blue(),"dark blue":discord.Colour.dark_blue(),"purple":discord.Colour.purple(),"dark purple":discord.Colour.dark_purple(),"magenta":discord.Colour.magenta(),"dark magenta":discord.Colour.dark_magenta(),"gold":discord.Colour.gold(),"dark gold":discord.Colour.dark_gold(),"orange":discord.Colour.orange(),"dark orange":discord.Colour.dark_orange(),"red":discord.Colour.red(),"dark red":discord.Colour.dark_red(),"lighter grey":discord.Colour.lighter_grey(),"dark grey":discord.Colour.dark_grey(),"light grey":discord.Colour.light_grey(),"darker grey":discord.Colour.darker_grey(),"blurple":discord.Colour.blurple(),"greyple":discord.Colour.greyple()}
@@ -28,19 +28,20 @@ def randomcolour():
     return colour
 
 def getcaptainrole (guild):
-    cursor = sqlConn.cursor()
-    cursor.execute('EXEC corgi.GetServerCaptain ?;',guild.id)
-    for row in cursor:
-        return row[0]
-    cursor.close()
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with sqlConn.cursor() as cursor:
+            cursor.execute('EXEC corgi.GetServerCaptain ?;',guild.id)
+            for row in cursor:
+                return row[0]
+            #cursor.close()
     return None
 
-def getteams (player):
+def getteams (player,sqlConn):
     cursor = sqlConn.cursor()
     cursor.execute('EXEC corgi.GetTeams ?;',player.id)
     return cursor
 
-def getcaptainteams (captain):
+def getcaptainteams (captain,sqlConn):
     cursor = sqlConn.cursor()
     cursor.execute('EXEC corgi.GetCaptainTeams ?;',captain.id)
     return cursor
@@ -141,10 +142,11 @@ async def createteam(message):
         captainrole = discord.utils.get(message.guild.roles, id=captainroleID)
         await captainrole.edit(position=1)
         await message.author.add_roles(newteam)
-        cursor = sqlConn.cursor()
-        cursor.execute('EXEC corgi.CreateTeam ?, ?, ?, ?, ?;', message.guild.id,newteam.id,newteam.name,message.author.id,message.author.id)
-        sqlConn.commit()
-        cursor.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with sqlConn.cursor() as cursor:
+                cursor.execute('EXEC corgi.CreateTeam ?, ?, ?, ?, ?;', message.guild.id,newteam.id,newteam.name,message.author.id,message.author.id)
+                sqlConn.commit()
+                #cursor.close()
         response = "New team " + newteam.name +" created."
         await message.channel.send(response.format(message))
         embed = discord.Embed(title="New Team Created", color=colour) 
@@ -175,33 +177,35 @@ async def registerteam(client,message):
             return
         else:
             eventid = int(message.content[14:])
-            events = getevent(message.guild,eventid)
-            if events is None:
-                response = "Invalid event ID; event does not exist."
-                await message.channel.send(response.format(message))
-                return
-            for event in events:
-                eventname = event[1]
-                isteam = event[4]
-                channels = event[5]
-            events.close()
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                with getevent(message.guild,eventid,sqlConn) as events:
+                    if events is None:
+                        response = "Invalid event ID; event does not exist."
+                        await message.channel.send(response.format(message))
+                        return
+                    for event in events:
+                        eventname = event[1]
+                        isteam = event[4]
+                        channels = event[5]
+                    #events.close()
             if isteam == 0:
                 response = "Event is not a team event. You cannot register teams for a team event."
                 await message.channel.send(response.format(message))
                 return
-            teams = getcaptainteams(message.author)
-            #Now because Python can't count we have to do dumb shit...
-            t = 0
-            teamids = []
-            teamnames = []
-            response = "What team do you want to register for the event " + eventname + "?"
-            for team in teams:
-                if discord.utils.get(message.guild.roles, id=team[0]):
-                    t = t + 1
-                    teamids.append(team[0])
-                    teamnames.append(team[1])
-                    response = response + "\n" + digitemojis[t] + ": " + team[1]                    
-            teams.close()
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                with getcaptainteams(message.author,sqlConn) as teams:
+                    #Now because Python can't count we have to do dumb shit...
+                    t = 0
+                    teamids = []
+                    teamnames = []
+                    response = "What team do you want to register for the event " + eventname + "?"
+                    for team in teams:
+                        if discord.utils.get(message.guild.roles, id=team[0]):
+                            t = t + 1
+                            teamids.append(team[0])
+                            teamnames.append(team[1])
+                            response = response + "\n" + digitemojis[t] + ": " + team[1]                    
+                    #teams.close()
             if t == 0:
                 response = "You haven't created a team to register. Use the `$CreateTeam` command."
                 await message.channel.send(response.format(message))
@@ -238,18 +242,19 @@ async def registerteam(client,message):
                     return
                 teamid = teamids[emojidigits[digitrespond[0].emoji]-1]
                 teamname = teamnames[emojidigits[digitrespond[0].emoji]-1]
-            cursor = sqlConn.cursor()
-            try:
-                cursor.execute('EXEC corgi.RegisterTeam ?, ?;',eventid,teamid)
-            except pyodbc.Error as ex:
-                if ex.args[0] == '42000':
-                    response = "A player in your team is already registered for the event on another Team. A player cannot be registered multiple times for the same event."
-                if ex.args[0] == '23000':
-                    response = "You are already registered for this event."
-                await message.channel.send(response.format(message))
-                return
-            sqlConn.commit()
-            cursor.close()
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                with sqlConn.cursor() as cursor:
+                    try:
+                        cursor.execute('EXEC corgi.RegisterTeam ?, ?;',eventid,teamid)
+                    except pyodbc.Error as ex:
+                        if ex.args[0] == '42000':
+                            response = "A player in your team is already registered for the event on another Team. A player cannot be registered multiple times for the same event."
+                        if ex.args[0] == '23000':
+                            response = "You are already registered for this event."
+                        await message.channel.send(response.format(message))
+                        return
+                    sqlConn.commit()
+                    #cursor.close()
             response = "Team " + teamname + " has been registered for the event " + eventname + "."
             team = discord.utils.get(message.guild.roles, id=teamid)
             await message.channel.send(response.format(message))
@@ -305,16 +310,17 @@ async def deregisterteam(client,message):
             return
         else:
             eventid = int(message.content[16:])
-            events = getevent(message.guild,eventid)
-            if events is None:
-                response = "Invalid event ID; event does not exist."
-                await message.channel.send(response.format(message))
-                return
-            for event in events:
-                eventname = event[1]
-                isteam = event[4]
-                channels = event[5]
-            events.close()
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                with getevent(message.guild,eventid) as events:
+                    if events is None:
+                        response = "Invalid event ID; event does not exist."
+                        await message.channel.send(response.format(message))
+                        return
+                    for event in events:
+                        eventname = event[1]
+                        isteam = event[4]
+                        channels = event[5]
+                    #events.close()
             response = "Are you sure you want to deregister your team for the event " + eventname + "?"
             choice = await message.channel.send(response.format(message))
             await choice.add_reaction(greenTick)
@@ -332,12 +338,13 @@ async def deregisterteam(client,message):
                 await message.channel.send(response.format(message))
                 return
             else:
-                cursor = sqlConn.cursor()
-                cursor.execute('EXEC corgi.DeregisterTeam ?, ?;',eventid,message.author.id)
-                for row in cursor:
-                    teamid = row[0]
-                sqlConn.commit()
-                cursor.close()
+                with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                    with sqlConn.cursor() as cursor:
+                        cursor.execute('EXEC corgi.DeregisterTeam ?, ?;',eventid,message.author.id)
+                        for row in cursor:
+                            teamid = row[0]
+                        sqlConn.commit()
+                        #cursor.close()
                 if teamid is None:
                     response = "You did not have any teams registered for the event " + eventname + "."
                     await message.channel.send(response.format(message))
@@ -368,20 +375,20 @@ async def addplayer(client,message):
             response = "You must mention the user you want to add to your Team."
             await message.channel.send(response.format(message))
             return
-        
-        teams = getcaptainteams(message.author)
-        #Now because Python can't count we have to do dumb shit...
-        t = 0
-        teamids = []
-        teamnames = []
-        response = "What team do you want to add the player " + message.mentions[0].display_name + " to?"
-        for team in teams:
-            if discord.utils.get(message.guild.roles, id=team[0]):
-                t = t + 1
-                teamids.append(team[0])
-                teamnames.append(team[1])
-                response = response + "\n" + digitemojis[t] + ": " + team[1]                    
-        teams.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with getcaptainteams(message.author,sqlConn) as teams:
+                #Now because Python can't count we have to do dumb shit...
+                t = 0
+                teamids = []
+                teamnames = []
+                response = "What team do you want to add the player " + message.mentions[0].display_name + " to?"
+                for team in teams:
+                    if discord.utils.get(message.guild.roles, id=team[0]):
+                        t = t + 1
+                        teamids.append(team[0])
+                        teamnames.append(team[1])
+                        response = response + "\n" + digitemojis[t] + ": " + team[1]                    
+                #teams.close()
         if t == 0:
             response = "You haven't created a team to add a player to. Use the `$CreateTeam` command."
             await message.channel.send(response.format(message))
@@ -418,16 +425,17 @@ async def addplayer(client,message):
                 return
             teamid = teamids[emojidigits[digitrespond[0].emoji]-1]
             teamname = teamnames[emojidigits[digitrespond[0].emoji]-1]
-        cursor = sqlConn.cursor()
-        try:
-            cursor.execute('EXEC corgi.AddPlayer ?, ?;',teamid,message.mentions[0].id)
-        except pyodbc.Error as ex:
-            if ex.args[0] == '23000':
-                response = "Player already registered for this team."
-            await message.channel.send(response.format(message))
-            return
-        sqlConn.commit()
-        cursor.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with sqlConn.cursor() as cursor:
+                try:
+                    cursor.execute('EXEC corgi.AddPlayer ?, ?;',teamid,message.mentions[0].id)
+                except pyodbc.Error as ex:
+                    if ex.args[0] == '23000':
+                        response = "Player already registered for this team."
+                    await message.channel.send(response.format(message))
+                    return
+                sqlConn.commit()
+                #cursor.close()
         response = "Player " + message.mentions[0].display_name + " has been added to the team " + teamname + "."
         team = discord.utils.get(message.guild.roles, id=teamid)
         await message.mentions[0].add_roles(team)
@@ -455,19 +463,20 @@ async def removeplayer(client,message):
             response = "You must mention the user you want to remove from your Team."
             await message.channel.send(response.format(message))
             return
-        teams = getcaptainteams(message.author)
-        #Now because Python can't count we have to do dumb shit...
-        t = 0
-        teamids = []
-        teamnames = []
-        response = "What team do you want to remove the player " + message.mentions[0].display_name + " to?"
-        for team in teams:
-            if discord.utils.get(message.guild.roles, id=team[0]):
-                t = t + 1
-                teamids.append(team[0])
-                teamnames.append(team[1])
-                response = response + "\n" + digitemojis[t] + ": " + team[1]                    
-        teams.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with getcaptainteams(message.author,sqlConn) as teams:
+                #Now because Python can't count we have to do dumb shit...
+                t = 0
+                teamids = []
+                teamnames = []
+                response = "What team do you want to remove the player " + message.mentions[0].display_name + " to?"
+                for team in teams:
+                    if discord.utils.get(message.guild.roles, id=team[0]):
+                        t = t + 1
+                        teamids.append(team[0])
+                        teamnames.append(team[1])
+                        response = response + "\n" + digitemojis[t] + ": " + team[1]                    
+                #teams.close()
         if t == 0:
             response = "You haven't created a team to remove a player from. Use the `$CreateTeam` command."
             await message.channel.send(response.format(message))
@@ -504,17 +513,18 @@ async def removeplayer(client,message):
                 return
             teamid = teamids[emojidigits[digitrespond[0].emoji]-1]
             teamname = teamnames[emojidigits[digitrespond[0].emoji]-1]
-        cursor = sqlConn.cursor()
-        try:
-            cursor.execute('EXEC corgi.RemovePlayer ?, ?;',teamid,message.mentions[0].id)
-        except:
-            response = "Failed to remove Player."
-            await message.channel.send(response.format(message))
-            return
-        for row in cursor:
-            playerid = row[0]            
-        sqlConn.commit()
-        cursor.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with sqlConn.cursor() as cursor:
+                try:
+                    cursor.execute('EXEC corgi.RemovePlayer ?, ?;',teamid,message.mentions[0].id)
+                except:
+                    response = "Failed to remove Player."
+                    await message.channel.send(response.format(message))
+                    return
+                for row in cursor:
+                    playerid = row[0]            
+                sqlConn.commit()
+                #cursor.close()
         if playerid is None:
             response = "Player " + message.mentions[0].display_name + " was not part of the team " + teamname + "."
             await message.channel.send(response.format(message))
@@ -546,19 +556,20 @@ async def changecolour(client,message):
         if not re.match("[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]",teamcolour) and colours.count(teamcolour) == 0 and not teamcolour == "random":
             await message.channel.send("Invalid hex or predefined colour.")
             return
-        teams = getcaptainteams(message.author)
-        #Now because Python can't count we have to do dumb shit...
-        t = 0
-        teamids = []
-        teamnames = []
-        response = "What team do you want to change the colour of?"
-        for team in teams:
-            if discord.utils.get(message.guild.roles, id=team[0]):
-                t = t + 1
-                teamids.append(team[0])
-                teamnames.append(team[1])
-                response = response + "\n" + digitemojis[t] + ": " + team[1]                    
-        teams.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with getcaptainteams(message.author,sqlConn) as teams:
+                #Now because Python can't count we have to do dumb shit...
+                t = 0
+                teamids = []
+                teamnames = []
+                response = "What team do you want to change the colour of?"
+                for team in teams:
+                    if discord.utils.get(message.guild.roles, id=team[0]):
+                        t = t + 1
+                        teamids.append(team[0])
+                        teamnames.append(team[1])
+                        response = response + "\n" + digitemojis[t] + ": " + team[1]                    
+                #teams.close()
         if t == 0:
             response = "You haven't created a team to change. Use the `$CreateTeam` command."
             await message.channel.send(response.format(message))
@@ -635,19 +646,20 @@ async def renameteam(client,message):
             response = "A team, role or category with that name already exists on the server. Please choose a different name."
             await message.channel.send(response.format(message))
             return
-        teams = getcaptainteams(message.author)
-        #Now because Python can't count we have to do dumb shit...
-        t = 0
-        teamids = []
-        teamnames = []
-        response = "What team do you want to rename?"
-        for team in teams:
-            if discord.utils.get(message.guild.roles, id=team[0]):
-                t = t + 1
-                teamids.append(team[0])
-                teamnames.append(team[1])
-                response = response + "\n" + digitemojis[t] + ": " + team[1]                    
-        teams.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with getcaptainteams(message.author,sqlConn) as teams:
+                #Now because Python can't count we have to do dumb shit...
+                t = 0
+                teamids = []
+                teamnames = []
+                response = "What team do you want to rename?"
+                for team in teams:
+                    if discord.utils.get(message.guild.roles, id=team[0]):
+                        t = t + 1
+                        teamids.append(team[0])
+                        teamnames.append(team[1])
+                        response = response + "\n" + digitemojis[t] + ": " + team[1]                    
+                #teams.close()
         if t == 0:
             response = "You haven't created a team to rename. Use the `$CreateTeam` command."
             await message.channel.send(response.format(message))
@@ -684,15 +696,16 @@ async def renameteam(client,message):
                 return
             teamid = teamids[emojidigits[digitrespond[0].emoji]-1]
             teamname = teamnames[emojidigits[digitrespond[0].emoji]-1]
-        cursor = sqlConn.cursor()
-        try:
-            cursor.execute('EXEC corgi.RenameTeam ?, ?;',teamid,newname)
-        except:
-            response = "Failed to rename Team."
-            await message.channel.send(response.format(message))
-            return      
-        sqlConn.commit()
-        cursor.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with sqlConn.cursor() as cursor:
+                try:
+                    cursor.execute('EXEC corgi.RenameTeam ?, ?;',teamid,newname)
+                except:
+                    response = "Failed to rename Team."
+                    await message.channel.send(response.format(message))
+                    return      
+                sqlConn.commit()
+                #cursor.close()
         team = discord.utils.get(message.guild.roles, id=teamid)
         category = discord.utils.get(message.guild.categories, name=team.id)
         await category.edit(name=newname)
@@ -717,19 +730,20 @@ async def deleteteam(client,message):
     def digitResponse(r,u):
         return r.message.id == choice.id and u.id == message.author.id and emojidigits[r.emoji] <= t
     if iscaptain(message.guild,message.author):
-        teams = getcaptainteams(message.author)
-        #Now because Python can't count we have to do dumb shit...
-        t = 0
-        teamids = []
-        teamnames = []
-        response = "What team do you want to delete?"
-        for team in teams:
-            if discord.utils.get(message.guild.roles, id=team[0]):
-                t = t + 1
-                teamids.append(team[0])
-                teamnames.append(team[1])
-                response = response + "\n" + digitemojis[t] + ": " + team[1]                    
-        teams.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with getcaptainteams(message.author,sqlConn) as teams:
+                #Now because Python can't count we have to do dumb shit...
+                t = 0
+                teamids = []
+                teamnames = []
+                response = "What team do you want to delete?"
+                for team in teams:
+                    if discord.utils.get(message.guild.roles, id=team[0]):
+                        t = t + 1
+                        teamids.append(team[0])
+                        teamnames.append(team[1])
+                        response = response + "\n" + digitemojis[t] + ": " + team[1]                    
+                #teams.close()
         if t == 0:
             response = "You haven't created a team to delete. Use the `$CreateTeam` command."
             await message.channel.send(response.format(message))
@@ -781,15 +795,16 @@ async def deleteteam(client,message):
                 await message.channel.send(response.format(message))
                 return
         team = discord.utils.get(message.guild.roles, id=teamid)
-        cursor = sqlConn.cursor()
-        try:
-            cursor.execute('EXEC corgi.DeleteTeam ?;',teamid)
-        except:
-            response = "Failed to delete Team."
-            await message.channel.send(response.format(message))
-            return      
-        sqlConn.commit()
-        cursor.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with sqlConn.cursor() as cursor:
+                try:
+                    cursor.execute('EXEC corgi.DeleteTeam ?;',teamid)
+                except:
+                    response = "Failed to delete Team."
+                    await message.channel.send(response.format(message))
+                    return      
+                sqlConn.commit()
+                #cursor.close()
         response = "Team has been deleted."
         team = discord.utils.get(message.guild.roles, id=teamid)
         category = discord.utils.get(message.guild.categories, name=team.name)
@@ -816,21 +831,22 @@ async def leaveteam(client,message):
         return r.message.id == choice.id and u.id == message.author.id and r.emoji in ("✅","❎")
     def digitResponse(r,u):
         return r.message.id == choice.id and u.id == message.author.id and emojidigits[r.emoji] <= t
-    teams = getteams(message.author)
-    #Now because Python can't count we have to do dumb shit...
-    t = 0
-    teamids = []
-    teamnames = []
-    teamcaptains = []
-    response = "What team do you want to leave?"
-    for team in teams:
-        if discord.utils.get(message.guild.roles, id=team[0]):
-            t = t + 1
-            teamids.append(team[0])
-            teamnames.append(team[1])
-            teamcaptains.append(team[2])
-            response = response + "\n" + digitemojis[t] + ": " + team[1]               
-    teams.close()
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with getteams(message.author,sqlConn) as teams:
+            #Now because Python can't count we have to do dumb shit...
+            t = 0
+            teamids = []
+            teamnames = []
+            teamcaptains = []
+            response = "What team do you want to leave?"
+            for team in teams:
+                if discord.utils.get(message.guild.roles, id=team[0]):
+                    t = t + 1
+                    teamids.append(team[0])
+                    teamnames.append(team[1])
+                    teamcaptains.append(team[2])
+                    response = response + "\n" + digitemojis[t] + ": " + team[1]               
+            #teams.close()
     if t == 0:
         response = "You aren't part of any teams."
         await message.channel.send(response.format(message))
@@ -887,10 +903,11 @@ async def leaveteam(client,message):
         await message.channel.send(response.format(message))
         return
     team = discord.utils.get(message.guild.roles, id=teamid)
-    cursor = sqlConn.cursor()
-    cursor.execute('EXEC corgi.LeaveTeam ?, ?;',message.author.id,team.id)
-    sqlConn.commit()
-    cursor.close()
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with sqlConn.cursor() as cursor:
+            cursor.execute('EXEC corgi.LeaveTeam ?, ?;',message.author.id,team.id)
+            sqlConn.commit()
+            #cursor.close()
     message.author.remove_roles(team)
     embed = discord.Embed(title="Player Left Team", color=team.colour) 
     embed.add_field(name="Player Name", value=message.author.display_name, inline=False)
@@ -916,19 +933,20 @@ async def assigncaptain(client,message):
             response = "You can't assign yourself as the captain."
             await message.channel.send(response.format(message))
             return
-        teams = getcaptainteams(message.author)
-        #Now because Python can't count we have to do dumb shit...
-        t = 0
-        teamids = []
-        teamnames = []
-        response = "What team do you want to assign the captain on?"
-        for team in teams:
-            if discord.utils.get(message.guild.roles, id=team[0]):
-                t = t + 1
-                teamids.append(team[0])
-                teamnames.append(team[1])
-                response = response + "\n" + digitemojis[t] + ": " + team[1]                    
-        teams.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with getcaptainteams(message.author,sqlConn) as teams:
+                #Now because Python can't count we have to do dumb shit...
+                t = 0
+                teamids = []
+                teamnames = []
+                response = "What team do you want to assign the captain on?"
+                for team in teams:
+                    if discord.utils.get(message.guild.roles, id=team[0]):
+                        t = t + 1
+                        teamids.append(team[0])
+                        teamnames.append(team[1])
+                        response = response + "\n" + digitemojis[t] + ": " + team[1]                    
+                #teams.close()
         if t == 0:
             response = "You aren't the captain of any teams."
             await message.channel.send(response.format(message))
@@ -980,13 +998,11 @@ async def assigncaptain(client,message):
                 await message.channel.send(response.format(message))
                 return
         team = discord.utils.get(message.guild.roles, id=teamid)
-        cursor = sqlConn.cursor()
-        cursor.execute('EXEC corgi.AssignCaptain ?, ?;',team.id,message.mentions[0].id)
-        sqlConn.commit()
-        cursor = sqlConn.cursor()
-        cursor.execute('EXEC corgi.AssignCaptain ?, ?;',team.id,message.mentions[0].id)
-        sqlConn.commit()
-        cursor.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with sqlConn.cursor() as cursor:
+                cursor.execute('EXEC corgi.AssignCaptain ?, ?;',team.id,message.mentions[0].id)
+                sqlConn.commit()
+                #cursor = sqlConn.cursor()
         captain = discord.utils.get(message.guild.roles, id=getcaptainrole(message.guild))
         await message.mentions[0].add_roles(team)
         await message.mentions[0].add_roles(captain)
@@ -1018,44 +1034,47 @@ async def removeteam(role):
         for channel in category.channels:
             await channel.delete()
         await category.delete()
-    cursor = sqlConn.cursor()
-    cursor.execute('EXEC corgi.DeleteTeam ?;',role.id) 
-    sqlConn.commit()
-    cursor.close()
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with sqlConn.cursor() as cursor:
+            cursor.execute('EXEC corgi.DeleteTeam ?;',role.id) 
+            sqlConn.commit()
+            #cursor.close()
 
 async def reassigncaptain(member,retain):
     return
     teamcaptain = discord.utils.get(member.guild.roles, id=getcaptain(member.guild))
-    cursor = sqlConn.cursor()
-    if retain is None:
-        cursor.execute('EXEC corgi.ReassignCaptain ?, ?;',member.guild.id,member.id)
-    else:
-        cursor.execute('EXEC corgi.ReassignCaptain ?, ?, 1;',member.guild.id,member.id)
-    for row in cursor:
-        newcaptain = discord.utils.get(member.guild.members, id=row[1])
-        team = discord.utils.get(member.guild.roles, id=row[0])
-        await newcaptain.add_roles(teamcaptain)
-        embed = discord.Embed(title="Team Captain Reassigned", color=team.colour) 
-        embed.add_field(name="Team Name", value=team.name, inline=False)
-        embed.add_field(name="Team ID", value=team.id, inline=False)
-        embed.add_field(name="New Captain", value=newcaptain.display_name, inline=False)
-        embed.add_field(name="New Captain ID", value=newcaptain.id, inline=False)
-        now = datetime.utcnow()
-        embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
-        logchannel = discord.utils.get(member.guild.channels, name="corgi-logs")
-        await logchannel.send(embed=embed)
-    sqlConn.commit()
-    cursor.close()
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with sqlConn.cursor() as cursor:
+            if retain is None:
+                cursor.execute('EXEC corgi.ReassignCaptain ?, ?;',member.guild.id,member.id)
+            else:
+                cursor.execute('EXEC corgi.ReassignCaptain ?, ?, 1;',member.guild.id,member.id)
+            for row in cursor:
+                newcaptain = discord.utils.get(member.guild.members, id=row[1])
+                team = discord.utils.get(member.guild.roles, id=row[0])
+                await newcaptain.add_roles(teamcaptain)
+                embed = discord.Embed(title="Team Captain Reassigned", color=team.colour) 
+                embed.add_field(name="Team Name", value=team.name, inline=False)
+                embed.add_field(name="Team ID", value=team.id, inline=False)
+                embed.add_field(name="New Captain", value=newcaptain.display_name, inline=False)
+                embed.add_field(name="New Captain ID", value=newcaptain.id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                logchannel = discord.utils.get(member.guild.channels, name="corgi-logs")
+                await logchannel.send(embed=embed)
+            sqlConn.commit()
+            #cursor.close()
 
 async def clearcaptain(member):
-    cursor = sqlConn.cursor()
-    cursor.execute('EXEC corgi.ClearCaptain ?, ?;',member.guild.id,member.id)
-    teams = []
-    for row in cursor:
-        team = discord.utils.get(member.guild.roles, id=row[0])
-        teams.append(team.id)
-    sqlConn.commit()
-    cursor.close()
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with sqlConn.cursor() as cursor:
+            cursor.execute('EXEC corgi.ClearCaptain ?, ?;',member.guild.id,member.id)
+            teams = []
+            for row in cursor:
+                team = discord.utils.get(member.guild.roles, id=row[0])
+                teams.append(team.id)
+            sqlConn.commit()
+            #cursor.close()
     for remove in teams:
         team = discord.utils.get(member.guild.roles, id=remove)
         await removeteam(team)

@@ -11,7 +11,7 @@ SQLPassword = os.getenv('SQL_PASSWORD')
 
 SQLConnString = 'Driver={ODBC Driver 17 for SQL Server};Server=' + SQLServer + ';Database=' + SQLDatabase + ';UID='+ SQLLogin +';PWD=' + SQLPassword
 
-sqlConn = pyodbc.connect(SQLConnString,timeout=20)
+#sqlConn = pyodbc.connect(SQLConnString,timeout=20)
 
 greenTick = "✅"
 greenCross = "❎"
@@ -25,17 +25,17 @@ def validatedate(datestr):
     except:
         return False
 
-def getevent (guild,eventid):
+def getevent (guild,eventid,sqlConn):
     cursor = sqlConn.cursor()
     cursor.execute('EXEC corgi.GetEvent ?, ?;',guild.id,eventid)
     return cursor
 
-def geteventdetail (guild,eventid):
+def geteventdetail (guild,eventid,sqlConn):
     cursor = sqlConn.cursor()
     cursor.execute('EXEC corgi.GetEventDetail ?, ?;',guild.id,eventid)
     return cursor
 
-def getdetail (guild,detailid):
+def getdetail (guild,detailid,sqlConn):
     cursor = sqlConn.cursor()
     cursor.execute('EXEC corgi.GetDetail ?, ?;',guild.id,detailid)
     return cursor
@@ -104,12 +104,13 @@ async def addevent(client,message):
                 teamchannels = 0
             else:
                 teamchannels = 1
-        cursor = sqlConn.cursor()
-        cursor.execute('EXEC corgi.AddEvent ?, ?, ?, ?, ?, ?, ?;',message.guild.id,eventname,startdate,enddate,teams,teamchannels,message.author.id)
-        for row in cursor:
-            eventid = row[0]
-        cursor.commit()
-        cursor.close()
+        with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+            with sqlConn.cursor() as cursor:
+                cursor.execute('EXEC corgi.AddEvent ?, ?, ?, ?, ?, ?, ?;',message.guild.id,eventname,startdate,enddate,teams,teamchannels,message.author.id)
+                for row in cursor:
+                    eventid = row[0]
+                cursor.commit()
+                #cursor.close()
         response = "Event Created."
         await message.channel.send(response.format(message))
         #Log details
@@ -125,47 +126,48 @@ async def addevent(client,message):
     return
 
 async def eventdetails(message,eventid):
-    details = geteventdetail(message.guild,eventid)
-    r = 1
-    embed = None
-    for row in details:
-        eventid = row[0]
-        eventname = row[1]
-        startdate = row[2]
-        enddate = row[3]
-        teamevent = row[4]
-        teamchannels = row[5]
-        detailid = row[6]
-        detailname = row[7]
-        detail = row[8]
-        if r == 1:
-            embed = discord.Embed(title=eventname, color=discord.Colour.orange())
-            embed.add_field(name="Start Date", value=row[2], inline=True)
-            embed.add_field(name="End Date", value=row[3], inline=True)
-            if row[4] == 1:
-                TeamEvent = "Yes"
-                if row[5] == 1:
-                    TeamChannels = "Yes"
-                else:
-                    TeamChannels = "No"
-            else: 
-                TeamEvent = "No"
-            embed.add_field(name="Team Event", value=TeamEvent, inline=True)
-            if TeamEvent == "Yes":
-                embed.add_field(name="Team Channels", value=TeamChannels, inline=True)
-            embed.add_field(name="Event ID", value=row[0], inline=True)
-        if not(detailid is None):
-            embed.add_field(name="\u200b",value="\u200b",inline=False)
-            embed.add_field(name=detailname,value=detail,inline=True)
-            embed.add_field(name="Detail ID",value=detailid,inline=True)
-        r = r + 1
-    details.close()
-    if embed is None:
-        response = "Invalid event ID; event does not exist."
-        await message.channel.send(response.format(message))
-    else:
-        await message.channel.send(embed=embed)
-    return
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with geteventdetail(message.guild,eventid,sqlConn) as details:
+            r = 1
+            embed = None
+            for row in details:
+                eventid = row[0]
+                eventname = row[1]
+                #startdate = row[2]
+                #enddate = row[3]
+                #teamevent = row[4]
+                #teamchannels = row[5]
+                detailid = row[6]
+                detailname = row[7]
+                detail = row[8]
+                if r == 1:
+                    embed = discord.Embed(title=eventname, color=discord.Colour.orange())
+                    embed.add_field(name="Start Date", value=row[2], inline=True)
+                    embed.add_field(name="End Date", value=row[3], inline=True)
+                    if row[4] == 1:
+                        TeamEvent = "Yes"
+                        if row[5] == 1:
+                            TeamChannels = "Yes"
+                        else:
+                            TeamChannels = "No"
+                    else: 
+                        TeamEvent = "No"
+                    embed.add_field(name="Team Event", value=TeamEvent, inline=True)
+                    if TeamEvent == "Yes":
+                        embed.add_field(name="Team Channels", value=TeamChannels, inline=True)
+                    embed.add_field(name="Event ID", value=row[0], inline=True)
+                if not(detailid is None):
+                    embed.add_field(name="\u200b",value="\u200b",inline=False)
+                    embed.add_field(name=detailname,value=detail,inline=True)
+                    embed.add_field(name="Detail ID",value=detailid,inline=True)
+                r = r + 1
+        #details.close()
+        if embed is None:
+            response = "Invalid event ID; event does not exist."
+            await message.channel.send(response.format(message))
+        else:
+            await message.channel.send(embed=embed)
+        return
 
 
 async def adddetail(client,message):
@@ -182,12 +184,13 @@ async def adddetail(client,message):
             return
         else:
             eventid = int(message.content[16:])
-            event = getevent(message.guild,eventid)
-            if event is None:
-                response = "Invalid event ID; event does not exist."
-                await message.channel.send(response.format(message))
-                return
-            event.close()
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                with getevent(message.guild,eventid,sqlConn) as event:
+                    if event is None:
+                        response = "Invalid event ID; event does not exist."
+                        await message.channel.send(response.format(message))
+                        return
+                    #event.close()
             response = "What is the name of the detail you want to add?"
             await message.channel.send(response.format(message))
             try:
@@ -204,12 +207,13 @@ async def adddetail(client,message):
                 response = "No response received. Detail amendedment cancelled."
                 await message.channel.send(response.format(message))
                 return
-            cursor = sqlConn.cursor()
-            cursor.execute('EXEC corgi.AddDetail ?, ?, ?;',eventid,detailname.content,detail.content)
-            for row in cursor:
-                detailid = row[0]
-            cursor.commit()
-            cursor.close()
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                with sqlConn.cursor() as cursor:
+                    cursor.execute('EXEC corgi.AddDetail ?, ?, ?;',eventid,detailname.content,detail.content)
+                    for row in cursor:
+                        detailid = row[0]
+                    cursor.commit()
+                    #cursor.close()
             response = "Detail has been added to the event."
             await message.channel.send(response.format(message))
 
@@ -364,10 +368,11 @@ async def editevent(client,message):
                     channels = 0
                 else:
                     channels = 1
-            cursor = sqlConn.cursor()
-            cursor.execute('EXEC corgi.EditEvent ?, ?, ?, ?, ?, ?, ?;',message.guild.id,eventid,eventname,startdate,enddate,teamevent,channels)
-            cursor.commit()
-            cursor.close()
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                with sqlConn.cursor() as cursor:
+                    cursor.execute('EXEC corgi.EditEvent ?, ?, ?, ?, ?, ?, ?;',message.guild.id,eventid,eventname,startdate,enddate,teamevent,channels)
+                    cursor.commit()
+                    #cursor.close()
             response = "Event Amended."
             await message.channel.send(response.format(message))
             #Log details
@@ -421,10 +426,11 @@ async def deleteevent(client,message):
                 await message.channel.send(response.format(message))
                 return
             else:
-                cursor = sqlConn.cursor()
-                cursor.execute('EXEC corgi.DeleteEvent ?, ?;', message.guild.id, eventid)
-                cursor.commit()
-                cursor.close()
+                with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                    with sqlConn.cursor() as cursor:
+                        cursor.execute('EXEC corgi.DeleteEvent ?, ?;', message.guild.id, eventid)
+                        cursor.commit()
+                        #cursor.close()
                 response = "Event Deleted."
                 await message.channel.send(response.format(message))
                 #Log details
@@ -453,15 +459,16 @@ async def deletedetail(client,message):
             return
         else:
             detailid = message.content[14:]
-            detail = getdetail(message.guild,detailid)
-            if detail is None:
-                response = "Invalid detail ID; detail does not exist."
-                await message.channel.send(response.format(message))
-                return
-            for row in detail:
-                eventname = row[1]
-                detailname = row[7]
-            detail.close()
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                with getdetail(message.guild,detailid,sqlConn) as detail:
+                    if detail is None:
+                        response = "Invalid detail ID; detail does not exist."
+                        await message.channel.send(response.format(message))
+                        return
+                    for row in detail:
+                        eventname = row[1]
+                        detailname = row[7]
+                    #detail.close()
             response = "Are you sure you want to delete the detail " + detailname + " for the event " + eventname + "?"
             respond = await message.channel.send(response.format(message))
             await respond.add_reaction(greenTick)
@@ -479,10 +486,11 @@ async def deletedetail(client,message):
                 await message.channel.send(response.format(message))
                 return
             else:
-                cursor = sqlConn.cursor()
-                cursor.execute('EXEC corgi.DeleteDetail ?, ?;', message.guild.id, detailid)
-                cursor.commit()
-                cursor.close()
+                with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                    with sqlConn.cursor() as cursor:
+                        cursor.execute('EXEC corgi.DeleteDetail ?, ?;', message.guild.id, detailid)
+                        cursor.commit()
+                        #cursor.close()
                 response = "Detail Deleted."
                 await message.channel.send(response.format(message))
                 #Log details
@@ -500,29 +508,31 @@ async def deletedetail(client,message):
 
 async def events(message):
     embed = discord.Embed(title="Current Events", color=discord.Colour.orange())
-    cursor = sqlConn.cursor()
-    cursor.execute('EXEC corgi.GetEvents ?;',message.guild.id)
-    e = 1
-    for row in cursor:
-        if e > 1:
-            embed.add_field(name="\n\u200b",value="\n\u200b",inline=False)
-        embed.add_field(name="Name", value=row[1], inline=False)
-        embed.add_field(name="Start Date", value=row[2], inline=True)
-        embed.add_field(name="End Date", value=row[3], inline=True)
-        if row[4] == 1:
-            TeamEvent = "Yes"
-            if row[5] == 1:
-                TeamChannels = "Yes"
-            else:
-                TeamChannels = "No"
-        else: 
-            TeamEvent = "No"
-        embed.add_field(name="Team Event", value=TeamEvent, inline=True)
-        if TeamEvent == "Yes":
-            embed.add_field(name="Team Channels", value=TeamChannels, inline=True)
-        embed.add_field(name="Event ID", value=row[0], inline=True)
-        e = e + 1
-    cursor.close()
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with sqlConn.cursor() as cursor:
+            #cursor = sqlConn.cursor()
+            cursor.execute('EXEC corgi.GetEvents ?;',message.guild.id)
+            e = 1
+            for row in cursor:
+                if e > 1:
+                    embed.add_field(name="\n\u200b",value="\n\u200b",inline=False)
+                embed.add_field(name="Name", value=row[1], inline=False)
+                embed.add_field(name="Start Date", value=row[2], inline=True)
+                embed.add_field(name="End Date", value=row[3], inline=True)
+                if row[4] == 1:
+                    TeamEvent = "Yes"
+                    if row[5] == 1:
+                        TeamChannels = "Yes"
+                    else:
+                        TeamChannels = "No"
+                else: 
+                    TeamEvent = "No"
+                embed.add_field(name="Team Event", value=TeamEvent, inline=True)
+                if TeamEvent == "Yes":
+                    embed.add_field(name="Team Channels", value=TeamChannels, inline=True)
+                embed.add_field(name="Event ID", value=row[0], inline=True)
+                e = e + 1
+            
     await message.channel.send(embed=embed)
     return
             
