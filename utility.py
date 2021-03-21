@@ -33,7 +33,7 @@ async def loscheck(client,message):
         m1 = "m"
     elif m1size[0].emoji == "🇱":
         m1 = "l"
-    elif m1size[0].emojin == "🇭":
+    elif m1size[0].emoji == "🇭":
         m1 = "h"
     response = "Is the model you are drawing LOS *to* a 🇸mall, 🇲edium, 🇱arge, or 🇭uge base model?"
     size = await message.channel.send(response.format(message))
