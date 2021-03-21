@@ -63,6 +63,9 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
+    elif message.author.bot:
+        print('Message from bot {0.author}: {0.content}'.format(message))
+        return
     if not(debugon is None):
         print('Message from {0.author}: {0.content}'.format(message))
 
