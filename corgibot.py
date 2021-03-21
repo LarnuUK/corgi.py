@@ -6,7 +6,7 @@ from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
 
-import pairings, access, teams, events, games, rulewordings, redeem
+import pairings, access, teams, events, games, rulewordings, redeem, utility
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -389,6 +389,10 @@ async def on_message(message):
             response = "You can only use this command in a table channel."
             await message.channel.send(response.format(message))
         return
+
+        if message.content.lower() == "$loscheck":
+            await utility.loscheck(client,message)
+            return
 
     if message.content.lower().startswith("$redeem"):
         if "table" in str(message.channel).lower() or str(message.channel).lower().startswith("bot"):
