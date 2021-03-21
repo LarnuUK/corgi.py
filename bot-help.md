@@ -10,6 +10,7 @@
 - `$Events` - Give a list of ongoing and upcoming events on the server.
 - `$EventDetails` - Gives full information on a specific event on the server. Must be followed by the event's unique ID. For example `$EventDetails 101`.
 - `$GermanPairing` - Initiates a three player team pairing process against a mentioned user using the German Pairing Method. For example `$GermanPairing @Ryan`. You will first be asked if won the roll off, so please ensure you roll off for who picks the table first. Can only be used in table channels.
+- `$loscheck` - Initiates a volumetric LOS check. The bot will prompt you with questions and then provide an image to demonstrate the LOS. Can only be used in table channels.
 
 *With the exception of `$heret`, the following commands must be used in a bot channel.*
 
