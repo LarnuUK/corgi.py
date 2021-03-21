@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import discord, discord.utils, random, os, re, json, sys, time, secrets, pyodbc
 from decimal import Decimal
 
@@ -117,5 +116,3 @@ async def loscheck(client,message):
             reply = await message.channel.send(response.format(message))
     response = "https://fishcord.larnu.uk/corgi/loschecker/loschecker.php?m1="+m1+"&m2="+m2+"&buildingx="+buildingx.content+"&buildingy="+buildingy.content+"&builddist="+buildingdist.content+"&modeldist="+modeldist.content
     reply = await message.channel.send(response.format(message))
-    
-
