@@ -390,9 +390,10 @@ async def on_message(message):
             await message.channel.send(response.format(message))
         return
 
-        if message.content.lower() == "$loscheck":
+    if message.content.lower() == "$loscheck":
+        if str(message.channel).lower().startswith("table"):
             await utility.loscheck(client,message)
-            return
+        return
 
     if message.content.lower().startswith("$redeem"):
         if "table" in str(message.channel).lower() or str(message.channel).lower().startswith("bot"):
