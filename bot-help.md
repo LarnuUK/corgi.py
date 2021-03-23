@@ -45,9 +45,3 @@
 - `$AddRoleAccess` - Gives a role an access level on the bot. Must be followed by a valid role/mentioned role: for example `$AddRoleAccess Team Captain`.
 - `$RemoveRoleAccess` - Removes access levels on the bot for a role. Must be followed by a valid role/mentioned role. For example `$RemoveRoleAccess Team Captain`.
 - `$CheckRoleAccess` - Confirms the access level on the bot for a role. Must be followed by a valid role/mentioned role. For example `$CheckRoleAccess Team Captain`.
-
-### VTC Server Only Commands *(Can only be used by the Server Owner on the VTC Server)*: 
-- `$LimitVCs` - Limits the maximum users who can connect to a game VC to 4.
-- `$UnlimitVCs` - Removes to limit to the maximum users who can connect to a game VC.
-- `$OpenServer` - Allows everyone to access the table text and voice channels
-- `$CloseServer` - Removes everyone to access the table text and voice channels
