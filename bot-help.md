@@ -1,9 +1,9 @@
 ### All User commands:
 - `$Help` - Provides a link to this page.
 - `$Roll` - rolls a D6.
-- `$Roll {n}d{s}` - rolls a `n` dice with `s` sides. For example `$roll 2d6` or `$roll 1d3`.
+- `$Roll {n}d{s}` - rolls `n` dice with `s` sides. For example `$roll 2d6` or `$roll 1d3`.
 - `$QuantumRoll` - rolls a D6. *Uses Quantum numbers. For the non-beleivers.*
-- `$QuantumRoll {n}d{s}` - rolls a `n` dice with `s` sides. For example `$roll 2d6` or `$roll 1d3`. *Uses Quantum numbers. For the non-beleivers.*
+- `$QuantumRoll {n}d{s}` - rolls `n` dice with `s` sides. For example `$roll 2d6` or `$roll 1d3`. *Uses Quantum numbers. For the non-beleivers.*
 - `$Flip` - Flips a coin.
 - `$Timezones` - Lists timezones available for the timezone converion commands.
 - `${timezone}` - Converts a time to designated Timezone. For example `$CEST 09:00 PDT` will convert the 09:00 CEST to Pacific Daylight Time, `$NZST 12:00 ACDT` will conver 12:00 NZST to ACDT. Times must be in the format `hh:mm`. 
