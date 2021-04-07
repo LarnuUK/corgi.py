@@ -158,6 +158,14 @@ async def on_message(message):
             await message.channel.send(rule.format(message))
         return
 
+    if message.content.lower().startswith("$mute"):
+        await access.muteuser(message)
+        return
+
+    if message.content.lower().startswith("$unmute"):
+        await access.unmuteuser(message)
+        return
+
     for mentions in message.mentions:
         if mentions.id == message.guild.me.id:
             await message.channel.send("Woof?")

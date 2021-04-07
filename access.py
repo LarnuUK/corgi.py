@@ -87,6 +87,15 @@ def getcaptain(guild):
         cursor.close()
     return captain
 
+def getmute(guild):
+    with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+        with sqlConn.cursor() as cursor:
+            cursor.execute('EXEC corgi.GetMuteRole ?;',guild.id)
+            for row in cursor:
+                mute = row[0]
+        cursor.close()
+    return mute
+
 async def addaccess(client,message):
     #Check permissions
     if isowner(message.guild,message.author) or isadmin(message.guild,message.author):
@@ -231,3 +240,109 @@ async def checkaccess(message):
                 response = "The role " + checkrole.name + " currently has no access level."
             await message.channel.send(response.format(message))
     return
+
+async def muteuser(message):
+    if isowner(message.guild,message.author) or isadmin(message.guild,message.author) or isheadjudge(message.guild,message.author) or isjudge(message.guild,message.author):
+        if len(message.mentions) == 0:
+            response = "No user mentioned to mute."
+            await message.channel.send(response.format(message))
+            return
+        else:
+            if isowner(message.guild,message.author):
+                userlevel = 4
+            elif isadmin(message.guild,message.author):
+                userlevel = 3
+            elif isheadjudge(message.guild,message.author):
+                userlevel = 2
+            elif isheadjudge(message.guild,message.author):
+                userlevel = 1
+            else:
+                userlevel = 0
+
+            if isowner(message.guild,message.mentions[0]):
+                mutelevel = 4
+            elif isadmin(message.guild,message.mentions[0]):
+                mutelevel = 3
+            elif isheadjudge(message.guild,message.mentions[0]):
+                mutelevel = 2
+            elif isheadjudge(message.guild,message.mentions[0]):
+                mutelevel = 1
+            else:
+                mutelevel = 0
+            
+            if userlevel < mutelevel:
+                response = "You cannot mute that user!"
+                await message.channel.send(response.format(message))
+                return
+            else:
+                muteroleid = getmute(message.guild)
+                if muteroleid == None:
+                    response = "Mute role has not been assigned on this server. Unable to mute User."
+                    await message.channel.send(response.format(message))
+                    return
+                muterole = discord.utils.get(message.guild.roles, id=muteroleid)
+                await message.mentions[0].add_roles(muterole)
+                response = "User has been given the " + muterole.name + " role."
+                await message.channel.send(response.format(message))
+                embed = discord.Embed(title="User Muted", color=muterole.colour) 
+                embed.add_field(name="Muted By", value=message.author.display_name, inline=False)
+                embed.add_field(name="Muted By ID", value=message.author.id, inline=False)
+                embed.add_field(name="Muted Name", value=message.mentions[0].display_name, inline=False)
+                embed.add_field(name="Muted ID", value=message.mentions[0].id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
+                await logchannel.send(embed=embed)
+
+async def unmuteuser(message):
+    if isowner(message.guild,message.author) or isadmin(message.guild,message.author) or isheadjudge(message.guild,message.author) or isjudge(message.guild,message.author):
+        if len(message.mentions) == 0:
+            response = "No user mentioned to mute."
+            await message.channel.send(response.format(message))
+            return
+        else:
+            if isowner(message.guild,message.author):
+                userlevel = 4
+            elif isadmin(message.guild,message.author):
+                userlevel = 3
+            elif isheadjudge(message.guild,message.author):
+                userlevel = 2
+            elif isheadjudge(message.guild,message.author):
+                userlevel = 1
+            else:
+                userlevel = 0
+
+            if isowner(message.guild,message.mentions[0]):
+                mutelevel = 4
+            elif isadmin(message.guild,message.mentions[0]):
+                mutelevel = 3
+            elif isheadjudge(message.guild,message.mentions[0]):
+                mutelevel = 2
+            elif isheadjudge(message.guild,message.mentions[0]):
+                mutelevel = 1
+            else:
+                mutelevel = 0
+            
+            if userlevel < mutelevel:
+                response = "You cannot unmute that user!"
+                await message.channel.send(response.format(message))
+                return
+            else:
+                muteroleid = getmute(message.guild)
+                if muteroleid == None:
+                    response = "Mute role has not been assigned on this server. Unable to unmute User."
+                    await message.channel.send(response.format(message))
+                    return
+                muterole = discord.utils.get(message.guild.roles, id=muteroleid)
+                await message.mentions[0].remove_roles(muterole)
+                response = "User has had the " + muterole.name + " role removed."
+                await message.channel.send(response.format(message))
+                embed = discord.Embed(title="User Unmuted", color=muterole.colour) 
+                embed.add_field(name="Unmuted By", value=message.author.display_name, inline=False)
+                embed.add_field(name="Unmuted By ID", value=message.author.id, inline=False)
+                embed.add_field(name="Unmuted Name", value=message.mentions[0].display_name, inline=False)
+                embed.add_field(name="Unmuted ID", value=message.mentions[0].id, inline=False)
+                now = datetime.utcnow()
+                embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
+                await logchannel.send(embed=embed)
