@@ -85,7 +85,7 @@ async def removecaptain (client,message):
                 await message.channel.send(response.format(message))
                 return
             else:
-                response = "Are you sure you want to remove the Captain Role from " + message.mentions[0].display_name + "? Any teams that are a captain of will heave a new captain randomly assigned and teams with no members will be deleted."
+                response = "Are you sure you want to remove the Captain Role from " + message.mentions[0].display_name + "? Any teams that they are a captain of will have a new captain (who is a member of the team) randomly assigned and teams with no members will be deleted."
                 choice = await message.channel.send(response.format(message))
                 await choice.add_reaction(greenTick)
                 await choice.add_reaction(greenCross)
@@ -1086,4 +1086,3 @@ async def clearcaptain(member):
         embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
         logchannel = discord.utils.get(member.guild.channels, name="corgi-logs")
         await logchannel.send(embed=embed)
-    
