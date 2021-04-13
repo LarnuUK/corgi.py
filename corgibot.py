@@ -6,7 +6,7 @@ from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
 
-import pairings, access, teams, events, games, rulewordings, redeem, utility
+import pairings, access, teams, events, games, rulewordings, redeem, utility, adhoc
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -500,6 +500,7 @@ async def on_message(message):
 
     if not(debugon is None):
         print('Random Number is:' + str(rng))
+        
     
     if (rng % 50 == 0 or (message.channel.name.lower().startswith('bot') and message.content.lower() == 'play fetch')) and not(message.content.lower() == 'play tug of war'):
         print("Playing Fetch Game")
@@ -508,6 +509,11 @@ async def on_message(message):
     if ((rng % 25 == 0 and not(rng % 50 == 0)) or (message.channel.name.lower().startswith('bot') and message.content.lower() == 'play tug of war')) and not(message.content.lower() == 'play fetch'):
         #await games.playtugofwar(client,message)
         print("Tug of War Game Disabled")
+
+    #Adhoc Commands. Only work in Debug Mode
+    if not(debugon is None) and message.content.lower() == "$synctables":
+        await adhoc.synctables(message)
+        return
             
 
 @client.event
