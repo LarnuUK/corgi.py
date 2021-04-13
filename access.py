@@ -270,7 +270,7 @@ async def muteuser(message):
             else:
                 mutelevel = 0
             
-            if userlevel < mutelevel:
+            if userlevel <= mutelevel:
                 response = "You cannot mute that user!"
                 await message.channel.send(response.format(message))
                 return
@@ -323,7 +323,7 @@ async def unmuteuser(message):
             else:
                 mutelevel = 0
             
-            if userlevel < mutelevel:
+            if userlevel <= mutelevel:
                 response = "You cannot unmute that user!"
                 await message.channel.send(response.format(message))
                 return
