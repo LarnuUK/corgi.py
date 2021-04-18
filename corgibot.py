@@ -514,6 +514,10 @@ async def on_message(message):
     if not(debugon is None) and message.content.lower() == "$synctables":
         await adhoc.synctables(message)
         return
+    
+    if not(debugon is None) and message.content.lower().startswith("$purgeroles"):
+        await adhoc.purgeroles(message)
+        return
             
 
 @client.event
