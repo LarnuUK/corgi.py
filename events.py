@@ -250,7 +250,8 @@ async def editevent(client,message):
             return
         else:
             eventid = message.content[11:]
-            event = getevent(message.guild,eventid)
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                event = getevent(message.guild,eventid,sqlConn)
             if event is None:
                 response = "Invalid event ID; event does not exist."
                 await message.channel.send(response.format(message))
@@ -401,7 +402,8 @@ async def deleteevent(client,message):
             return
         else:
             eventid = message.content[13:]
-            event = getevent(message.guild,eventid)
+            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                event = getevent(message.guild,eventid,sqlConn)
             if event is None:
                 response = "Invalid event ID; event does not exist."
                 await message.channel.send(response.format(message))
@@ -535,4 +537,3 @@ async def events(message):
             
     await message.channel.send(embed=embed)
     return
-            

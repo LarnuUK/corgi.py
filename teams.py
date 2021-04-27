@@ -275,6 +275,8 @@ async def registerteam(client,message):
                 teamcategory = await message.guild.create_category(teamname)
                 #await newcategory.edit(position=6)
                 botrole = discord.utils.get(message.guild.roles, name="Bot")
+                if botrole is None:
+                    botrole = discord.utils.get(message.guild.roles, name="Corgi")
                 captainroleid = getcaptainrole(message.guild)
                 captainrole = discord.utils.get(message.guild.roles, id=captainroleid)
                 talkrights = {message.guild.default_role: discord.PermissionOverwrite(read_messages=False),botrole: discord.PermissionOverwrite(read_messages=True)}
@@ -311,7 +313,7 @@ async def deregisterteam(client,message):
         else:
             eventid = int(message.content[16:])
             with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
-                with getevent(message.guild,eventid) as events:
+                with getevent(message.guild,eventid,sqlConn) as events:
                     if events is None:
                         response = "Invalid event ID; event does not exist."
                         await message.channel.send(response.format(message))
@@ -330,11 +332,11 @@ async def deregisterteam(client,message):
             except:
                 await booleanrespond.remove_reaction(greenTick,client.user)
                 await booleanrespond.remove_reaction(greenCross,client.user)
-                response = "No response received. DeRegistration cancelled."
+                response = "No response received. Deregistration cancelled."
                 await message.channel.send(response.format(message))
                 return                
             if booleanrespond[0].emoji == greenCross:
-                response = "DeRegistration cancelled."
+                response = "Deregistration cancelled."
                 await message.channel.send(response.format(message))
                 return
             else:
@@ -350,7 +352,7 @@ async def deregisterteam(client,message):
                     await message.channel.send(response.format(message))
                 else:
                     team = discord.utils.get(message.guild.roles, id=teamid)
-                    response = "Team " + team.name + " has been registered for the event " + eventname + "."
+                    response = "Team " + team.name + " has been deregistered for the event " + eventname + "."
                     await message.channel.send(response.format(message))
                     embed = discord.Embed(title="Team Deregistered for Event", color=team.colour) 
                     embed.add_field(name="Deregistered By", value=message.author.display_name, inline=False)
