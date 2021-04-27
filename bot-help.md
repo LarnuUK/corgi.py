@@ -1,4 +1,7 @@
-### All User commands:
+## [Commands](#commands) {#commands}
+Below are a the currently available commands Corgi has.
+
+### [All User commands](#user) {#user}
 - `$Help` - Provides a link to this page.
 - `$Roll` - rolls a D6.
 - `$Roll {n}d{s}` - rolls `n` dice with `s` sides. For example `$roll 2d6` or `$roll 1d3`.
@@ -19,7 +22,7 @@
 - `$LeaveTeam` - Leave a team you are a member of. If you are a Captain of the team, you will need to assign another player as the Captain first.
 - `$FetchScores` - Get the leader board for the Fetch easter egg minigame.
 
-### Team Captain Commands:
+### [Team Captain Commands](#captain) {#captain}
 - `$CreateTeam` - Create a Team with the provided name. For example `$CreateTeam The Speedy Turtles`
 - `$TeamColour` - Changed the colour of your Team! Use `$Colours` for supported colours.
 - `$AddPlayer` - Adds a player to a team. Must be followed by a mentioned user. For example `$AddPlayer @Dean`.
@@ -31,7 +34,7 @@
 - `$DeleteTeam` - Delete a team you are a captain of. Options will be presented to you. This action **cannot** be undone if committed.
 
 
-### Head Judge Commands:
+### [Head Judge Commands](#headjudge) {#headjudge}
 - `$heret` - Sets a timer for the requested time period. Time must in the format `hh:mm`. Must be followed by a message. For example `$heret 01:30 Dice down!`. On expiry the @here role will be pinged.
 - `$AddEvent` - Create an event on the server. Needs to be followed by a name for said event. For example `$AddEvent 50pt Steamroller`
 - `$AddEventDetail` - Add a detail to an existing event. Must be followed by the event's unique ID. For example `$AddEventDetail 101`.
@@ -41,7 +44,10 @@
 - `$AddCaptain` - Grants a user the Team Captain Role related to that server. Must be followed by a mentioned user. For example `$AddCaptain @Barry`.
 - `$RemoveCaptain` - Removes the Team Captain Role related to the server from the User. Must be followed by a mentioned user. For example `$RemoveCaptain @Barry`. If the Captain has made any teams, a new Team Captain will be assigned. If they have any teams that only they are part of, they will be deleted.
 
-### Server Administrator Commands:
+### [Server Administrator Commands](#admin) {#admin}
 - `$AddRoleAccess` - Gives a role an access level on the bot. Must be followed by a valid role/mentioned role: for example `$AddRoleAccess Team Captain`.
 - `$RemoveRoleAccess` - Removes access levels on the bot for a role. Must be followed by a valid role/mentioned role. For example `$RemoveRoleAccess Team Captain`.
 - `$CheckRoleAccess` - Confirms the access level on the bot for a role. Must be followed by a valid role/mentioned role. For example `$CheckRoleAccess Team Captain`.
+
+## [Inviting Corgi](#inviting) {#inviting}
+If you want Corgi on your own server, you can invite him [here](https://discord.com/api/oauth2/authorize?client_id=721707690124115991&permissions=2650275409&scope=bot). Note, however, that as the bot is set up primarily for Fishcord and the VTC it has certain expectations of the server that are currently hard coded. For the time being, a text channel called "corgi-logs" must exist, for the bot to place its logs, and commands noted as only working in a "bot" or "table" channel will only work in channels where the channel's name begin with "bot" and "table" respectively.
