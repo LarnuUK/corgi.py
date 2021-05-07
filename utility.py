@@ -137,7 +137,7 @@ async def rolls(client,message):
             plusneg = "+"
         else:
             sides = int(dice[dice.find("d")+1:dice.find("-")])
-            mod = int(dice[dice.find("-"):])a
+            mod = int(dice[dice.find("-"):])
             plusneg = ""
         valid = 1
     elif re.match("[0-9]+d[0-9]+",dice):
