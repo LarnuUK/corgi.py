@@ -131,6 +131,18 @@ async def rolls(client,message):
     if re.match("[0-9]+d[0-9]+",dice):
         die = int(dice[0:dice.find("d")])
         sides = int(dice[dice.find("d")+1:])
+        mod = 0
+        plusneg = ""
+    elif re.match("[0-9]+d[0-9]+[-+][0-9]+",dice):
+        die = int(dice[0:dice.find("d")])
+        if dice.find("-") == -1:
+            sides = int(dice[dice.find("d")+1:dice.find("+")])
+            mod = int(dice[dice.find("+"):])
+            plusneg = "+"
+        else:
+            sides = int(dice[dice.find("d")+1:dice.find("-")])
+            mod = int(dice[dice.find("-"):])
+            plusneg = "-"
         if die > 20:
             response = "Cannot roll more than 20 die at a time."
             await message.channel.send(response.format(message))
@@ -145,8 +157,10 @@ async def rolls(client,message):
             while r < die:
                 i = random.randint(1,sides)
                 rolls.append(i)
-                total = total + i
+                total = total + i + mod
                 rollstr = rollstr + ", " + str(i)
+                if mod != 0:
+                    rollstr = rollstr + "(" + plusneg + str(mod) + ")"
                 r = r+1
             response = "You rolled a total of " + str(total) + " {0.author.mention}: (" + rollstr[2:] + ")"
             await message.channel.send(response.format(message))
