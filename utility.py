@@ -128,11 +128,13 @@ async def roll(client,message):
     #if message.content.lower().startswith("$roll "):
 async def rolls(client,message):    
     dice = message.content[6:]
+    valid = 0
     if re.match("[0-9]+d[0-9]+",dice):
         die = int(dice[0:dice.find("d")])
         sides = int(dice[dice.find("d")+1:])
         mod = 0
         plusneg = ""
+        valid = 1
     elif re.match("[0-9]+d[0-9]+[-+][0-9]+",dice):
         die = int(dice[0:dice.find("d")])
         if dice.find("-") == -1:
@@ -143,6 +145,12 @@ async def rolls(client,message):
             sides = int(dice[dice.find("d")+1:dice.find("-")])
             mod = int(dice[dice.find("-"):])
             plusneg = "-"
+        valid = 1
+    if valid == 0:
+        response = "Unrecognised die format. Use `{{n}}d{{s}}`. For example 2d6 or 1d3."
+        await message.channel.send(response.format(message))
+        return
+    else:
         if die > 20:
             response = "Cannot roll more than 20 die at a time."
             await message.channel.send(response.format(message))
@@ -165,10 +173,7 @@ async def rolls(client,message):
             response = "You rolled a total of " + str(total) + " {0.author.mention}: (" + rollstr[2:] + ")"
             await message.channel.send(response.format(message))
         return
-    else:
-        response = "Unrecognised die format. Use `{{n}}d{{s}}`. For example 2d6 or 1d3."
-        await message.channel.send(response.format(message))
-        return
+    
 
 async def quantumroll(client,message):
     i = math.floor(quantumrandom.randint(1,7))
