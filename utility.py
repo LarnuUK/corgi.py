@@ -129,13 +129,7 @@ async def roll(client,message):
 async def rolls(client,message):    
     dice = message.content[6:]
     valid = 0
-    if re.match("[0-9]+d[0-9]+",dice):
-        die = int(dice[0:dice.find("d")])
-        sides = int(dice[dice.find("d")+1:])
-        mod = 0
-        plusneg = ""
-        valid = 1
-    elif re.match("[0-9]+d[0-9]+[-+][0-9]+",dice):
+    if re.match("[0-9]+d[0-9]+[-+][0-9]+",dice):
         die = int(dice[0:dice.find("d")])
         if dice.find("-") == -1:
             sides = int(dice[dice.find("d")+1:dice.find("+")])
@@ -143,8 +137,14 @@ async def rolls(client,message):
             plusneg = "+"
         else:
             sides = int(dice[dice.find("d")+1:dice.find("-")])
-            mod = int(dice[dice.find("-"):])
-            plusneg = "-"
+            mod = int(dice[dice.find("-"):])a
+            plusneg = ""
+        valid = 1
+    elif re.match("[0-9]+d[0-9]+",dice):
+        die = int(dice[0:dice.find("d")])
+        sides = int(dice[dice.find("d")+1:])
+        mod = 0
+        plusneg = ""
         valid = 1
     if valid == 0:
         response = "Unrecognised die format. Use `{{n}}d{{s}}`. For example 2d6 or 1d3."
