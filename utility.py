@@ -59,7 +59,7 @@ async def loscheck(client,message):
     reply = await message.channel.send(response.format(message))
     while validreply == False:
         try:
-            buildingy = await client.wait_for('message',check=isSameChannel,timeout=10)
+            buildingy = await client.wait_for('message',check=isSameChannel,timeout=20)
         except:
             response = "No response received. Cancelled LOS checking."
             await message.channel.send(response.format(message))
@@ -74,7 +74,7 @@ async def loscheck(client,message):
     validreply = False
     while validreply == False:
         try:
-            buildingx = await client.wait_for('message',check=isSameChannel,timeout=10)
+            buildingx = await client.wait_for('message',check=isSameChannel,timeout=20)
         except:
             response = "No response received. Cancelled LOS checking."
             await message.channel.send(response.format(message))
@@ -89,7 +89,7 @@ async def loscheck(client,message):
     validreply = False
     while validreply == False:
         try:
-            buildingdist = await client.wait_for('message',check=isSameChannel,timeout=10)
+            buildingdist = await client.wait_for('message',check=isSameChannel,timeout=20)
         except:
             response = "No response received. Cancelled LOS checking."
             await message.channel.send(response.format(message))
@@ -104,7 +104,7 @@ async def loscheck(client,message):
     validreply = False
     while validreply == False:
         try:
-            modeldist = await client.wait_for('message',check=isSameChannel,timeout=10)
+            modeldist = await client.wait_for('message',check=isSameChannel,timeout=20)
         except:
             response = "No response received. Cancelled LOS checking."
             await message.channel.send(response.format(message))
