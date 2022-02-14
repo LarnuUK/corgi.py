@@ -1088,3 +1088,77 @@ async def clearcaptain(member):
         embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
         logchannel = discord.utils.get(member.guild.channels, name="corgi-logs")
         await logchannel.send(embed=embed)
+
+async def purgeteams(client,message):
+    def booleanrespond(r,u):
+        return r.message.id == choice.id and u.id == message.author.id and r.emoji in ("✅","❎")
+    if isowner(message.guild,message.author) or isadmin(message.guild,message.author):
+        response = "Are you sure you want remove all teams from this server? **This action *CANNOT* be undone.**"
+        choice = await message.channel.send(response.format(message))
+        await choice.add_reaction(greenTick)
+        await choice.add_reaction(greenCross)
+        try:
+            booleanrespond = await client.wait_for('reaction_add',check=booleanrespond,timeout=10)
+        except:
+            await booleanrespond.remove_reaction(greenTick,client.user)
+            await booleanrespond.remove_reaction(greenCross,client.user)
+            response = "No response received. Purge not completed."
+            await message.channel.send(response.format(message))
+            return                
+        if booleanrespond[0].emoji == greenTick:
+            response = "Again: Are you sure you want remove all teams from this server? **This action *CANNOT* be undone.**"
+            choice = await message.channel.send(response.format(message))
+            await choice.add_reaction(greenTick)
+            await choice.add_reaction(greenCross)
+            booleanrespond = None
+            try:
+                booleanrespond = await client.wait_for('reaction_add',check=booleanrespond,timeout=10)
+            except:
+                await booleanrespond.remove_reaction(greenTick,client.user)
+                await booleanrespond.remove_reaction(greenCross,client.user)
+                response = "No response received. Purge not completed."
+                await message.channel.send(response.format(message))
+                return                
+            if booleanrespond[0].emoji == greenTick:
+                response = "Ok, if you say so, you're the boss... Beginning mass purge of all teams in this server."
+                await message.channel.send(response.format(message))
+                with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                    with sqlConn.cursor() as teamCursor:
+                        teamCursor.execute('EXEC corgi.GetServerTeams ?;',message.guild.id) 
+                        for teamRow in teamCursor:  
+                            teamid = teamRow[0]
+                            teamname = teamRow[1]
+                            team = discord.utils.get(message.guild.roles, id=teamid)
+                            with pyodbc.connect(SQLConnString,timeout=20) as sqlConn:
+                                with sqlConn.cursor() as cursor:
+                                    try:
+                                        cursor.execute('EXEC corgi.DeleteTeam ?;',teamid)
+                                    except:
+                                        response = "Failed to delete Team."
+                                        await message.channel.send(response.format(message))
+                                        return      
+                                    sqlConn.commit()
+                                    #cursor.close()
+                            team = discord.utils.get(message.guild.roles, id=teamid)
+                            category = discord.utils.get(message.guild.categories, name=team.name)
+                            teamcolour = team.colour
+                            if not(category is None):
+                                for channel in category.channels:
+                                    await channel.delete()
+                                await category.delete()
+                            await team.delete()
+                            embed = discord.Embed(title="Team Deleted", color=teamcolour) 
+                            embed.add_field(name="Deleted By", value=message.author.display_name, inline=False)
+                            embed.add_field(name="Deleted By ID", value=message.author.id, inline=False)
+                            embed.add_field(name="Team Name", value=teamname, inline=False)
+                            embed.add_field(name="Team ID", value=team.id, inline=False)
+                            now = datetime.utcnow()
+                            embed.set_footer(text="Logged: " + now.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
+                            logchannel = discord.utils.get(message.guild.channels, name="corgi-logs")
+                            await logchannel.send(embed=embed)     
+        else:
+            return
+    else:
+        response = "You do not have permission to perform this action."
+        await message.channel.send(response.format(message))
+    return

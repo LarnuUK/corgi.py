@@ -498,6 +498,10 @@ async def on_message(message):
             await games.fetchhiscores(message)
             return
 
+        if message.content.lower() == "$purgeteams":
+            await teams.purgeteams(client,message)
+            return
+
     if not(debugon is None):
         print('Random Number is:' + str(rng))
         

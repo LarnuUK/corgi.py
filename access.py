@@ -16,7 +16,7 @@ digitemojis = {1:"1️⃣",2:"2️⃣",3:"3️⃣",4:"4️⃣",5:"5️⃣",6:"6�
 emojidigits = {"1️⃣":1,"2️⃣":2,"3️⃣":3,"4️⃣":4,"5️⃣":5,"6️⃣":6,"7️⃣":7,"8️⃣":8,"9️⃣":9,"🔟":10}
 
 def isowner(guild,user):
-    if guild.owner == user:
+    if guild.owner_id == user.id:
         return True
     else:
         return False
